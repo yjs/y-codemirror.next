@@ -1,0 +1,65 @@
+{
+  "name": "y-codemirror.next",
+  "version": "2.0.9",
+  "description": "CodeMirror6 binding for Yjs",
+  "main": "./dist/y-codemirror.cjs",
+  "types": "./dist/src/y-codemirror.d.ts",
+  "module": "./src/y-codemirror.js",
+  "sideEffects": false,
+  "funding": {
+    "type": "GitHub Sponsors ❤",
+    "url": "https://github.com/sponsors/dmonad"
+  },
+  "files": [
+    "dist/*",
+    "src/*"
+  ],
+  "scripts": {
+    "clean": "rm -rf dist",
+    "dist": "npm run clean && rollup -c && tsc",
+    "watch": "rollup -wc",
+    "test": "npm run dist && node test/test.node.cjs",
+    "test-extensive": "npm run dist && node test/test.node.cjs --production --repitition-time 10000",
+    "lint": "standard && tsc",
+    "preversion": "npm run lint && npm run test-extensive && npm run dist",
+    "debug": "concurrently 'http-server -o test.html' 'npm run watch'",
+    "start": "concurrently 'http-server -o demo/index.html' 'npm run watch'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yjs/y-codemirror.git"
+  },
+  "keywords": [
+    "Yjs"
+  ],
+  "author": "Kevin Jahns <kevin.jahns@protonmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yjs/y-codemirror/issues"
+  },
+  "homepage": "https://github.com/yjs/y-codemirror#readme",
+  "peerDependencies": {
+    "yjs": "^13.0.0",
+    "codemirror": "^5.52.2"
+  },
+  "dependencies": {
+    "eslint4b-prebuilt": "^6.7.2",
+    "lib0": "^0.2.33"
+  },
+  "devDependencies": {
+    "@codemirror/next": "^0.15.0",
+    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-node-resolve": "^11.0.1",
+    "@types/codemirror": "0.0.91",
+    "codemirror": "^5.57.0",
+    "concurrently": "^5.3.0",
+    "http-server": "^0.12.3",
+    "jsdom": "^16.4.0",
+    "rollup": "^2.35.1",
+    "rollup-plugin-terser": "^7.0.2",
+    "standard": "^14.3.4",
+    "typescript": "^3.9.7",
+    "y-webrtc": "^10.1.6",
+    "yjs": "^13.3.2"
+  }
+}
