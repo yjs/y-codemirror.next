@@ -20,7 +20,7 @@ const customLibModules = new Set([
 ])
 const debugResolve = {
   resolveId (importee) {
-    if (importee === 'y-codemirror') {
+    if (importee === 'y-codemirror.next') {
       return `${process.cwd()}/src/y-codemirror.js`
     }
     if (importee === 'yjs/tests/testHelper.js') {
@@ -89,7 +89,7 @@ export default [{
     commonjs(),
     ...minificationPlugins
   ]
-}, {
+} /*, {
   input: './test/index.js',
   output: {
     name: 'test',
@@ -124,4 +124,4 @@ export default [{
     })
   ],
   external: id => /^(lib0|codemirror|fs|path|jsdom|isomorphic)/.test(id)
-}]
+} */]
