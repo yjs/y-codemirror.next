@@ -13,7 +13,7 @@ const provider = new WebrtcProvider('codemirror6-demo-room', ydoc)
 const ytext = ydoc.getText('codemirror')
 
 const state = EditorState.create({
-  doc: '',
+  doc: ytext.toString(),
   extensions: [
     basicSetup,
     javascript(),

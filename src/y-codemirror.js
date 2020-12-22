@@ -1,8 +1,13 @@
 
 import * as Y from 'yjs' // eslint-disable-line
-import { StateField, Facet, ChangeSet, Transaction } from '@codemirror/next/state' // eslint-disable-line
+import { StateField, Facet, ChangeSet, Transaction, Annotation, AnnotationType } from '@codemirror/next/state' // eslint-disable-line
 import { ViewPlugin, PluginValue, ViewUpdate, EditorView } from '@codemirror/next/view' // eslint-disable-line
 import { InputState } from '@codemirror/next/view/src/input'
+
+/**
+ * @type {AnnotationType<YCollabConfig>}
+ */
+export const yAnnotation = Annotation.define()
 
 class LocalUpdate {
   /**
@@ -33,23 +38,49 @@ class YCollabViewPluginValue {
    */
   constructor (view) {
     this.view = view
+    this.prevText = null
+    this.prevAwareness = null
+    this.conf = view.state.facet(yCollabConfig)
+    this.conf.ytext.observe((event, tr) => {
+      debugger
+      if (tr.origin !== this.conf) {
+        const delta = event.delta
+        const changes = []
+        let pos = 0
+        for (let i = 0; i < delta.length; i++) {
+          const d = delta[i]
+          if (d.insert != null) {
+            changes.push({ from: pos, insert: d.insert })
+          } else if (d.delete != null) {
+            changes.push({ from: pos, to: pos + d.delete, insert: '' })
+          } else {
+            pos += d.retain
+          }
+        }
+        view.dispatch({ changes, annotations: [yAnnotation.of(this.conf)] })
+      }
+    })
   }
 
   /**
    * @param {ViewUpdate} update
    */
   update (update) {
-    const yconfig = this.view.state.facet(yCollabConfig)
-    const ytext = yconfig.ytext
-    update.changes.iterChanges((fromA, toA, fromB, toB, insert) => {
-      const insertText = insert.sliceString(0, insert.length, '\n')
-      if (fromA !== toA) {
-        ytext.delete(fromA, toA - fromA)
-      }
-      if (insertText.length > 0) {
-        ytext.insert(fromA, insertText)
-      }
-    })
+    if (update.transactions.length > 0 && update.transactions[0].annotation(yAnnotation) === this.conf) {
+      return
+    }
+    const ytext = this.conf.ytext
+    ytext.doc.transact(() => {
+      update.changes.iterChanges((fromA, toA, fromB, toB, insert) => {
+        const insertText = insert.sliceString(0, insert.length, '\n')
+        if (fromA !== toA) {
+          ytext.delete(fromA, toA - fromA)
+        }
+        if (insertText.length > 0) {
+          ytext.insert(fromA, insertText)
+        }
+      })
+    }, this.conf)
   }
 
   destroy () {
