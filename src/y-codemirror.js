@@ -1,33 +1,15 @@
 
 import * as Y from 'yjs' // eslint-disable-line
 import { StateField, Facet, ChangeSet, Transaction, Annotation, AnnotationType } from '@codemirror/next/state' // eslint-disable-line
-import { ViewPlugin, PluginValue, ViewUpdate, EditorView } from '@codemirror/next/view' // eslint-disable-line
-import { InputState } from '@codemirror/next/view/src/input'
+import { Range, ViewPlugin, PluginValue, ViewUpdate, EditorView, Decoration } from '@codemirror/next/view' // eslint-disable-line
+import { RangeSet, RangeSetBuilder } from '@codemirror/next/rangeset'
+import * as dom from 'lib0/dom.js'
+import * as pair from 'lib0/pair.js'
 
 /**
  * @type {AnnotationType<YCollabConfig>}
  */
 export const yAnnotation = Annotation.define()
-
-class LocalUpdate {
-  /**
-   * @param {Transaction} tr
-   * @param {ChangeSet} changes
-   */
-  constructor (tr, changes) {
-    this.origin = tr
-    this.changes = changes
-  }
-}
-
-class YCollabState {
-  /**
-   * @param {Array<LocalUpdate>} updates
-   */
-  constructor (updates) {
-    this.pending = updates
-  }
-}
 
 /**
  * @extends {PluginValue}
@@ -38,11 +20,8 @@ class YCollabViewPluginValue {
    */
   constructor (view) {
     this.view = view
-    this.prevText = null
-    this.prevAwareness = null
     this.conf = view.state.facet(yCollabConfig)
     this.conf.ytext.observe((event, tr) => {
-      debugger
       if (tr.origin !== this.conf) {
         const delta = event.delta
         const changes = []
@@ -90,13 +69,67 @@ class YCollabViewPluginValue {
 
 const YCollabViewPlugin = ViewPlugin.fromClass(YCollabViewPluginValue)
 
-const yCollabField = StateField.define({
-  create (state) {
-    return new YCollabState([])
-  },
-  update (state, tr) {
-    return new YCollabState(state.pending.concat([new LocalUpdate(tr, tr.changes)]))
+class YRemoteCursorWidget {
+  constructor (color) {
+    this.color = color
   }
+
+  toDOM () {
+    return /** @type {HTMLElement} */ (dom.element('span', [pair.create('class', 'y-cm-cursor'), pair.create('style', `color: ${this.color}`)]))
+  }
+
+  eq (widget) {
+    return widget.color === this.color
+  }
+
+  compare (widget) {
+    return widget.color === this.color
+  }
+
+  updateDOM () {
+    return false
+  }
+
+  get estimatedHeight () { return -1 }
+
+  ignoreEvent () {
+    return true
+  }
+}
+
+class YCollabCursorViewPluginValue {
+  /**
+   * @param {EditorView} view
+   */
+  constructor (view) {
+    this.view = view
+    this.conf = view.state.facet(yCollabConfig)
+    this.conf.awareness.on('change', (added, updated, removed) => {
+      console.log('y-awareness', { added, updated, removed })
+    })
+    this.decorations = RangeSet.of([])
+  }
+
+  /**
+   * @param {ViewUpdate} update
+   */
+  update (update) {
+    const decorations = new RangeSetBuilder()
+    decorations.add(1, 5, Decoration.mark({
+      attributes: { color: 'blue' },
+      class: 'y-cm-selection'
+    }))
+    decorations.add(5, 5, Decoration.widget({
+      side: 5 - 1 > 0 ? -1 : 1,
+      block: false,
+      widget: new YRemoteCursorWidget('blue')
+    }))
+    this.decorations = decorations.finish()
+  }
+}
+
+const YCollabCursorPlugin = ViewPlugin.fromClass(YCollabCursorViewPluginValue, {
+  decorations: v => v.decorations
 })
 
 export class YCollabConfig {
@@ -122,6 +155,6 @@ export const yCollabConfig = Facet.define({
  */
 export const ycollab = (ytext, awareness) => [
   yCollabConfig.of(new YCollabConfig(ytext, awareness)),
-  yCollabField,
-  YCollabViewPlugin
+  YCollabViewPlugin,
+  YCollabCursorPlugin
 ]
