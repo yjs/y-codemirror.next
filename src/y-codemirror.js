@@ -10,13 +10,35 @@ const baseTheme = EditorView.baseTheme({
   $yselection: {
   },
   $ycursor: {
-    position: 'relative'
+    position: 'relative',
+    borderLeft: '1px solid black',
+    borderRight: '1px solid black',
+    marginLeft: '-1px',
+    marginRight: '-1px',
+    boxSizing: 'border-box',
+    borderColor: 'orange',
+    display: 'inline'
+  },
+  '$ycursor::before': {
+    content: '"\u00a0"', // this is a unicode non-breaking space
+    borderRadius: '50%',
+    position: 'absolute',
+    width: '.4em',
+    height: '.4em',
+    top: '-.32em',
+    left: '-.2em',
+    backgroundColor: 'inherit',
+    transition: 'transform .3s ease-in-out'
+  },
+  '$ycursor:hover::before': {
+    transformOrigin: 'bottom center',
+    transform: 'scale(0)'
   },
   $ycursorInfo: {
     position: 'absolute',
     top: '-1.05em',
     left: '-1px',
-    fontSize: '.6em',
+    fontSize: '.75em',
     fontFamily: 'serif',
     fontStyle: 'normal',
     fontWeight: 'normal',
@@ -26,45 +48,17 @@ const baseTheme = EditorView.baseTheme({
     paddingLeft: '2px',
     paddingRight: '2px',
     zIndex: 3,
-    transition: 'opacity .3s ease-in-out'
+    transition: 'opacity .3s ease-in-out',
+    backgroundColor: 'inherit',
+    // these should be separate
+    opacity: 0,
+    transitionDelay: '0s'
+  },
+  '$ycursor:hover > $ycursorInfo': {
+    opacity: 1,
+    transitionDelay: '0s'
   }
 })
-
-/*
-.remote-caret {
-  position: relative;
-  border-left: 1px solid black;
-  border-right: 1px solid black;
-  margin-left: -1px;
-  margin-right: -1px;
-  box-sizing: border-box;
-}
-.remote-caret > div {
-  position: absolute;
-  top: -1.05em;
-  left: -1px;
-  font-size: .6em;
-  background-color: rgb(250, 129, 0);
-  font-family: serif;
-  font-style: normal;
-  font-weight: normal;
-  line-height: normal;
-  user-select: none;
-  color: white;
-  padding-left: 2px;
-  padding-right: 2px;
-  z-index: 3;
-  transition: opacity .3s ease-in-out;
-}
-.remote-caret.hide-name > div {
-  transition-delay: .7s;
-  opacity: 0;
-}
-.remote-caret:hover > div {
-  opacity: 1;
-  transition-delay: 0s;
-}
-*/
 
 /**
  * @type {AnnotationType<YCollabConfig>}
@@ -135,7 +129,13 @@ class YRemoteCursorWidget {
   }
 
   toDOM () {
-    return /** @type {HTMLElement} */ (dom.element('div', [pair.create('class', themeClass('ycursor')), pair.create('style', `background-color: ${this.color}`)]))
+    return /** @type {HTMLElement} */ (dom.element('span', [pair.create('class', themeClass('ycursor')), pair.create('style', `background-color: ${this.color}`)], [
+      dom.element('div', [
+        pair.create('class', themeClass('ycursorInfo'))
+      ], [
+        dom.text('Keanu Reeves')
+      ])
+    ]))
   }
 
   eq (widget) {
@@ -175,10 +175,12 @@ class YCollabCursorViewPluginValue {
    */
   update (update) {
     const decorations = new RangeSetBuilder()
-    decorations.add(1, 5, Decoration.mark({
-      attributes: { style: 'background-color: orange' },
-      class: themeClass('yselection')
-    }))
+    if (3 !== 5) {
+      decorations.add(3, 5, Decoration.mark({
+        attributes: { style: 'background-color: orange' },
+        class: themeClass('yselection')
+      }))
+    }
     decorations.add(5, 5, Decoration.widget({
       side: 5 - 1 > 0 ? -1 : 1,
       block: false,

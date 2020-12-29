@@ -7,6 +7,7 @@ import { WebrtcProvider } from 'y-webrtc'
 
 import { EditorState, EditorView, basicSetup } from '@codemirror/next/basic-setup'
 import { javascript } from '@codemirror/next/lang-javascript'
+// import { oneDark } from '@codemirror/next/theme-one-dark'
 
 const ydoc = new Y.Doc()
 const provider = new WebrtcProvider('codemirror6-demo-room', ydoc)
@@ -18,6 +19,7 @@ const state = EditorState.create({
     basicSetup,
     javascript(),
     ycollab(ytext, provider.awareness)
+    // oneDark
   ]
 })
 
