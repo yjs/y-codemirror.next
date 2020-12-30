@@ -25,7 +25,7 @@ const baseTheme = EditorView.baseTheme({
     position: 'absolute',
     width: '.4em',
     height: '.4em',
-    top: '-.32em',
+    top: '-.37em',
     left: '-.2em',
     backgroundColor: 'inherit',
     transition: 'transform .3s ease-in-out'
