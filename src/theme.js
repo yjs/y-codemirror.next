@@ -42,7 +42,7 @@ export const baseTheme = EditorView.baseTheme({
     color: 'white',
     paddingLeft: '2px',
     paddingRight: '2px',
-    zIndex: 3,
+    zIndex: 101,
     transition: 'opacity .3s ease-in-out',
     backgroundColor: 'inherit',
     // these should be separate
