@@ -8,23 +8,81 @@ import * as pair from 'lib0/pair.js'
 import * as Y from 'yjs'
 import { ySyncFacet } from './y-sync.js'
 
+export const yRemoteSelectionsTheme = EditorView.baseTheme({
+  $ySelection: {
+  },
+  $ySelectionCaret: {
+    position: 'relative',
+    borderLeft: '1px solid black',
+    borderRight: '1px solid black',
+    marginLeft: '-1px',
+    marginRight: '-1px',
+    boxSizing: 'border-box',
+    display: 'inline'
+  },
+  '$ySelectionCaret::before': {
+    content: '"\u00a0"', // this is a unicode non-breaking space
+    borderRadius: '50%',
+    position: 'absolute',
+    width: '.4em',
+    height: '.4em',
+    top: '-.37em',
+    left: '-.2em',
+    backgroundColor: 'inherit',
+    transition: 'transform .3s ease-in-out'
+  },
+  '$ySelectionCaret:hover::before': {
+    transformOrigin: 'bottom center',
+    transform: 'scale(0)'
+  },
+  $ySelectionInfo: {
+    position: 'absolute',
+    top: '-1.05em',
+    left: '-1px',
+    fontSize: '.75em',
+    fontFamily: 'serif',
+    fontStyle: 'normal',
+    fontWeight: 'normal',
+    lineHeight: 'normal',
+    userSelect: 'none',
+    color: 'white',
+    paddingLeft: '2px',
+    paddingRight: '2px',
+    zIndex: 101,
+    transition: 'opacity .3s ease-in-out',
+    backgroundColor: 'inherit',
+    // these should be separate
+    opacity: 0,
+    transitionDelay: '0s'
+  },
+  '$ySelectionCaret:hover > $ySelectionInfo': {
+    opacity: 1,
+    transitionDelay: '0s'
+  }
+})
+
 /**
  * @todo specify the users that actually changed. Currently, we recalculate positions for every user.
  * @type {AnnotationType<Array<number>>}
  */
-const yRemoteCursorsAnnotation = Annotation.define()
+const yRemoteSelectionsAnnotation = Annotation.define()
 
-class YRemoteCursorWidget {
-  constructor (color) {
+class YRemoteCaretWidget {
+  /**
+   * @param {string} color
+   * @param {string} name
+   */
+  constructor (color, name) {
     this.color = color
+    this.name = name
   }
 
   toDOM () {
-    return /** @type {HTMLElement} */ (dom.element('span', [pair.create('class', themeClass('ycursor')), pair.create('style', `background-color: ${this.color}`)], [
+    return /** @type {HTMLElement} */ (dom.element('span', [pair.create('class', themeClass('ySelectionCaret')), pair.create('style', `background-color: ${this.color}; border-color: ${this.color}`)], [
       dom.element('div', [
-        pair.create('class', themeClass('ycursorInfo'))
+        pair.create('class', themeClass('ySelectionInfo'))
       ], [
-        dom.text('Keanu Reeves')
+        dom.text(this.name)
       ])
     ]))
   }
@@ -48,15 +106,15 @@ class YRemoteCursorWidget {
   }
 }
 
-class YRemoteCursorsPluginValue {
+export class YRemoteSelectionsPluginValue {
   /**
    * @param {EditorView} view
    */
   constructor (view) {
     this.conf = view.state.facet(ySyncFacet)
-    this.conf.awareness.on('change', (added, updated, removed) => {
-      console.log('y-awareness', { added, updated, removed })
-      view.dispatch({ annotations: [yRemoteCursorsAnnotation.of([])] })
+    this.conf.awareness.on('change', ({ added, updated, removed }, s, t) => {
+      console.log('y-awareness', { added, updated, removed }, s, t)
+      view.dispatch({ annotations: [yRemoteSelectionsAnnotation.of([])] })
     })
     /**
      * @type {DecorationSet}
@@ -114,22 +172,24 @@ class YRemoteCursorsPluginValue {
       if (anchor == null || head == null || anchor.type !== ytext || head.type !== ytext) {
         return
       }
+      const { color = '#30bced', name = 'Anonymous' } = state.user || {}
+      const colorLight = (state.user && state.user.colorLight) || color + '33'
       if (anchor.index !== head.index) {
         decorations.add(anchor.index, head.index, Decoration.mark({
-          attributes: { style: 'background-color: orange' },
-          class: themeClass('yselection')
+          attributes: { style: `background-color: ${colorLight}` },
+          class: themeClass('ySelection')
         }))
       }
       decorations.add(head.index, head.index, Decoration.widget({
         side: head.index - anchor.index > 0 ? -1 : 1, // the local cursor should be rendered outside the remote selection
         block: false,
-        widget: new YRemoteCursorWidget('orange')
+        widget: new YRemoteCaretWidget(color, name)
       }))
     })
     this.decorations = decorations.finish()
   }
 }
 
-export const yRemoteCursors = ViewPlugin.fromClass(YRemoteCursorsPluginValue, {
+export const yRemoteSelections = ViewPlugin.fromClass(YRemoteSelectionsPluginValue, {
   decorations: v => v.decorations
 })
