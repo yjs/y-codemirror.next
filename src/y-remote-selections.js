@@ -1,9 +1,10 @@
 
 import { ViewPlugin, ViewUpdate, EditorView, Decoration, themeClass, DecorationSet } from '@codemirror/next/view' // eslint-disable-line
-import { RangeSet, RangeSetBuilder } from '@codemirror/next/rangeset'
+import { RangeSet, Range } from '@codemirror/next/rangeset' // eslint-disable-line
 import { Annotation, AnnotationType } from '@codemirror/next/state' // eslint-disable-line
 import * as dom from 'lib0/dom.js'
 import * as pair from 'lib0/pair.js'
+import * as math from 'lib0/math.js'
 
 import * as Y from 'yjs'
 import { ySyncFacet } from './y-sync.js'
@@ -26,7 +27,7 @@ export const yRemoteSelectionsTheme = EditorView.baseTheme({
     position: 'absolute',
     width: '.4em',
     height: '.4em',
-    top: '-.37em',
+    top: '-.2em',
     left: '-.2em',
     backgroundColor: 'inherit',
     transition: 'transform .3s ease-in-out'
@@ -130,9 +131,9 @@ export class YRemoteSelectionsPluginValue {
     const ydoc = /** @type {Y.Doc} */ (ytext.doc)
     const awareness = this.conf.awareness
     /**
-     * @type {RangeSetBuilder<Decoration>}
+     * @type {Array<Range<Decoration>>}
      */
-    const decorations = new RangeSetBuilder()
+    const decorations = []
     const localAwarenessState = this.conf.awareness.getLocalState()
 
     // set local awareness state (update cursors)
@@ -141,9 +142,11 @@ export class YRemoteSelectionsPluginValue {
       const currentAnchor = localAwarenessState.cursor == null ? null : Y.createRelativePositionFromJSON(localAwarenessState.cursor.anchor)
       const currentHead = localAwarenessState.cursor == null ? null : Y.createRelativePositionFromJSON(localAwarenessState.cursor.head)
 
+      /*
       if (!update.view.hasFocus || !update.view.dom.ownerDocument.hasFocus()) {
         sel = null
       }
+      */
       if (sel != null) {
         const anchor = Y.createRelativePositionFromTypeIndex(ytext, sel.anchor)
         const head = Y.createRelativePositionFromTypeIndex(ytext, sel.head)
@@ -174,19 +177,29 @@ export class YRemoteSelectionsPluginValue {
       }
       const { color = '#30bced', name = 'Anonymous' } = state.user || {}
       const colorLight = (state.user && state.user.colorLight) || color + '33'
-      if (anchor.index !== head.index) {
-        decorations.add(anchor.index, head.index, Decoration.mark({
-          attributes: { style: `background-color: ${colorLight}` },
-          class: themeClass('ySelection')
-        }))
+      const start = math.min(anchor.index, head.index)
+      const end = math.max(anchor.index, head.index)
+      if (start !== end) {
+        decorations.push({
+          from: start,
+          to: end,
+          value: Decoration.mark({
+            attributes: { style: `background-color: ${colorLight}` },
+            class: themeClass('ySelection')
+          })
+        })
       }
-      decorations.add(head.index, head.index, Decoration.widget({
-        side: head.index - anchor.index > 0 ? -1 : 1, // the local cursor should be rendered outside the remote selection
-        block: false,
-        widget: new YRemoteCaretWidget(color, name)
-      }))
+      decorations.push({
+        from: head.index,
+        to: head.index,
+        value: Decoration.widget({
+          side: head.index - anchor.index > 0 ? -1 : 1, // the local cursor should be rendered outside the remote selection
+          block: false,
+          widget: new YRemoteCaretWidget(color, name)
+        })
+      })
     })
-    this.decorations = decorations.finish()
+    this.decorations = Decoration.set(decorations, true)
   }
 }
 
