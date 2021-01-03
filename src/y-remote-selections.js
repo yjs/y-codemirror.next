@@ -12,6 +12,10 @@ import { ySyncFacet } from './y-sync.js'
 export const yRemoteSelectionsTheme = EditorView.baseTheme({
   $ySelection: {
   },
+  $yLineSelection: {
+    padding: 0,
+    margin: '0px 2px 0px 4px'
+  },
   $ySelectionCaret: {
     position: 'relative',
     borderLeft: '1px solid black',
@@ -138,7 +142,7 @@ export class YRemoteSelectionsPluginValue {
 
     // set local awareness state (update cursors)
     if (localAwarenessState != null) {
-      let sel = update.state.selection.primary
+      const sel = update.state.selection.primary
       const currentAnchor = localAwarenessState.cursor == null ? null : Y.createRelativePositionFromJSON(localAwarenessState.cursor.anchor)
       const currentHead = localAwarenessState.cursor == null ? null : Y.createRelativePositionFromJSON(localAwarenessState.cursor.head)
 
@@ -183,11 +187,23 @@ export class YRemoteSelectionsPluginValue {
         decorations.push({
           from: start,
           to: end,
-          value: Decoration.mark({
+          value: Decoration.line({
             attributes: { style: `background-color: ${colorLight}` },
             class: themeClass('ySelection')
           })
         })
+        const startLine = update.view.state.doc.lineAt(start)
+        const endLine = update.view.state.doc.lineAt(end)
+        for (let i = startLine.number + 1; i < endLine.number; i++) {
+          const linePos = update.view.state.doc.line(i).from
+          decorations.push({
+            from: linePos,
+            to: linePos,
+            value: Decoration.line({
+              attributes: { style: `background-color: ${colorLight}`, class: themeClass('yLineSelection') }
+            })
+          })
+        }
       }
       decorations.push({
         from: head.index,
