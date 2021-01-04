@@ -183,17 +183,38 @@ export class YRemoteSelectionsPluginValue {
       const colorLight = (state.user && state.user.colorLight) || color + '33'
       const start = math.min(anchor.index, head.index)
       const end = math.max(anchor.index, head.index)
-      if (start !== end) {
+      const startLine = update.view.state.doc.lineAt(start)
+      const endLine = update.view.state.doc.lineAt(end)
+      if (startLine.number === endLine.number) {
+        // selected content in a single line.
         decorations.push({
           from: start,
           to: end,
-          value: Decoration.line({
+          value: Decoration.mark({
             attributes: { style: `background-color: ${colorLight}` },
             class: themeClass('ySelection')
           })
         })
-        const startLine = update.view.state.doc.lineAt(start)
-        const endLine = update.view.state.doc.lineAt(end)
+      } else {
+        // selected content in multiple lines
+        // first, render text-selection in the first line
+        decorations.push({
+          from: start,
+          to: startLine.from + startLine.length,
+          value: Decoration.mark({
+            attributes: { style: `background-color: ${colorLight}` },
+            class: themeClass('ySelection')
+          })
+        })
+        // render text-selection in the last line
+        decorations.push({
+          from: endLine.from,
+          to: end,
+          value: Decoration.mark({
+            attributes: { style: `background-color: ${colorLight}` },
+            class: themeClass('ySelection')
+          })
+        })
         for (let i = startLine.number + 1; i < endLine.number; i++) {
           const linePos = update.view.state.doc.line(i).from
           decorations.push({
