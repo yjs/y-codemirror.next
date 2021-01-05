@@ -89,7 +89,7 @@ export default [{
     commonjs(),
     ...minificationPlugins
   ]
-} /*, {
+}, {
   input: './test/index.js',
   output: {
     name: 'test',
@@ -123,5 +123,5 @@ export default [{
       mainFields: ['module', 'main']
     })
   ],
-  external: id => /^(lib0|codemirror|fs|path|jsdom|isomorphic)/.test(id)
-} */]
+  external: id => /^(lib0|fs|path|jsdom|isomorphic)/.test(id)
+}]

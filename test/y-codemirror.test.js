@@ -3,69 +3,107 @@ import * as t from 'lib0/testing.js'
 import * as prng from 'lib0/prng.js'
 import * as math from 'lib0/math.js'
 import * as Y from 'yjs' // eslint-disable-line
+import { EditorState, EditorView, basicSetup } from '@codemirror/next/basic-setup'
+
 import { applyRandomTests } from 'yjs/tests/testHelper.js'
 
-import CodeMirror from 'codemirror'
-import { CodemirrorBinding } from '../src/y-codemirror.js'
+import { yCollab } from 'y-codemirror.next'
 
 /**
- * @param {any} y
- * @return {CodeMirror.Editor}
+ * @param {any} ydoc
+ * @return {EditorView}
  */
-const createNewCodemirror = y => {
-  const editor = CodeMirror(document.createElement('div'), {
-    mode: 'javascript',
-    lineNumbers: true
+const createNewCodemirror = ydoc => {
+  const state = EditorState.create({
+    doc: ydoc.getText().toString(),
+    extensions: [
+      basicSetup,
+      yCollab(ydoc.getText())
+    ]
   })
-  const binding = new CodemirrorBinding(y.getText('codemirror'), editor)
-  return binding.cm
+  return new EditorView({ state })
 }
 
 let charCounter = 0
+
+/**
+ * @type {Array<function():{from:number,to:number,insert:string}>}
+ */
+const trChange = [
+  /**
+   * @param {Y.Doc} y
+   * @param {prng.PRNG} gen
+   * @param {EditorView} cm
+   */
+  (y, gen, cm) => { // insert text
+    const from = prng.int32(gen, 0, cm.state.doc.length)
+    const insert = charCounter++ + prng.utf16String(gen, 6)
+    return {
+      from,
+      to: from,
+      insert
+    }
+  },
+  /**
+   * @param {Y.Doc} y
+   * @param {prng.PRNG} gen
+   * @param {EditorView} cm
+   */
+  (y, gen, cm) => { // delete text
+    const from = prng.int32(gen, 0, cm.state.doc.length)
+    const to = from + prng.int32(gen, 0, cm.state.doc.length - from)
+    const insert = ''
+    return {
+      from,
+      to,
+      insert
+    }
+  },
+  /**
+   * @param {Y.Doc} y
+   * @param {prng.PRNG} gen
+   * @param {EditorView} cm
+   */
+  (y, gen, cm) => { // replace text
+    const from = prng.int32(gen, 0, cm.state.doc.length)
+    const to = from + math.min(prng.int32(gen, 0, cm.state.doc.length - from), 3)
+    const insert = charCounter++ + prng.word(gen)
+    return {
+      from,
+      to,
+      insert
+    }
+  },
+  /**
+   * @param {Y.Doc} y
+   * @param {prng.PRNG} gen
+   * @param {EditorView} cm
+   */
+  (y, gen, cm) => { // insert paragraph
+    const from = prng.int32(gen, 0, cm.state.doc.length)
+    const to = from + math.min(prng.int32(gen, 0, cm.state.doc.length - from), 3)
+    const insert = '\n'
+    return {
+      from,
+      to,
+      insert
+    }
+  }
+]
 
 const cmChanges = [
   /**
    * @param {Y.Doc} y
    * @param {prng.PRNG} gen
-   * @param {CodeMirror.Editor} cm
+   * @param {EditorView} cm
    */
-  (y, gen, cm) => { // insert text
-    const insertPos = prng.int32(gen, 0, cm.getValue().length)
-    const text = charCounter++ + prng.utf16String(gen, 6)
-    const pos = cm.posFromIndex(insertPos)
-    cm.replaceRange(text, pos, pos)
-  },
-  /**
-   * @param {Y.Doc} y
-   * @param {prng.PRNG} gen
-   * @param {CodeMirror.Editor} cm
-   */
-  (y, gen, cm) => { // delete text
-    const insertPos = prng.int32(gen, 0, cm.getValue().length)
-    const overwrite = prng.int32(gen, 0, cm.getValue().length - insertPos)
-    cm.replaceRange('', cm.posFromIndex(insertPos), cm.posFromIndex(insertPos + overwrite))
-  },
-  /**
-   * @param {Y.Doc} y
-   * @param {prng.PRNG} gen
-   * @param {CodeMirror.Editor} cm
-   */
-  (y, gen, cm) => { // replace text
-    const insertPos = prng.int32(gen, 0, cm.getValue().length)
-    const overwrite = math.min(prng.int32(gen, 0, cm.getValue().length - insertPos), 3)
-    const text = charCounter++ + prng.word(gen)
-    cm.replaceRange(text, cm.posFromIndex(insertPos), cm.posFromIndex(insertPos + overwrite))
-  },
-  /**
-   * @param {Y.Doc} y
-   * @param {prng.PRNG} gen
-   * @param {CodeMirror.Editor} cm
-   */
-  (y, gen, cm) => { // insert paragraph
-    const insertPos = prng.int32(gen, 0, cm.getValue().length)
-    const overwrite = math.min(prng.int32(gen, 0, cm.getValue().length - insertPos), 3)
-    const text = '\n'
-    cm.replaceRange(text, cm.posFromIndex(insertPos), cm.posFromIndex(insertPos + overwrite))
+  (y, gen, cm) => { // create a transaction containing 1-4 changes
+    const changes = []
+    const numOfChanges = prng.int31(gen, 1, 4)
+    for (let i = 0; i < numOfChanges; i++) {
+      changes.push(prng.oneOf(gen, trChange)(y, gen, cm))
+    }
+    cm.dispatch({ changes })
   }
 ]
 
@@ -74,11 +112,10 @@ const cmChanges = [
  */
 const checkResult = result => {
   for (let i = 1; i < result.testObjects.length; i++) {
-    const p1 = result.testObjects[i - 1].getValue()
-    const p2 = result.testObjects[i].getValue()
+    const p1 = result.testObjects[i - 1].state.doc.toString()
+    const p2 = result.testObjects[i].state.doc.toString()
     t.compare(p1, p2)
   }
-  // console.log(result.testObjects[0].getValue())
   charCounter = 0
 }
 

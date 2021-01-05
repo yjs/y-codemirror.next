@@ -10,9 +10,16 @@ export { yRemoteSelections, yRemoteSelectionsTheme, ySync, ySyncFacet, YSyncConf
  * @param {Y.Text} ytext
  * @param {any} awareness
  */
-export const yCollab = (ytext, awareness) => [
-  ySyncFacet.of(new YSyncConfig(ytext, awareness)),
-  ySync,
-  yRemoteSelectionsTheme,
-  yRemoteSelections
-]
+export const yCollab = (ytext, awareness) => {
+  const plugins = [
+    ySyncFacet.of(new YSyncConfig(ytext, awareness)),
+    ySync
+  ]
+  if (awareness) {
+    plugins.push(
+      yRemoteSelectionsTheme,
+      yRemoteSelections
+    )
+  }
+  return plugins
+}
