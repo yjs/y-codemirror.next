@@ -43,9 +43,10 @@ class YSyncPluginValue {
         for (let i = 0; i < delta.length; i++) {
           const d = delta[i]
           if (d.insert != null) {
-            changes.push({ from: pos, insert: d.insert })
+            changes.push({ from: pos, to: pos, insert: d.insert })
           } else if (d.delete != null) {
             changes.push({ from: pos, to: pos + d.delete, insert: '' })
+            pos += d.delete
           } else {
             pos += d.retain
           }
@@ -64,14 +65,19 @@ class YSyncPluginValue {
     }
     const ytext = this.conf.ytext
     ytext.doc.transact(() => {
+      /**
+       * This variable adjusts the fromA position to the current position in the Y.Text type.
+       */
+      let adj = 0
       update.changes.iterChanges((fromA, toA, fromB, toB, insert) => {
         const insertText = insert.sliceString(0, insert.length, '\n')
         if (fromA !== toA) {
-          ytext.delete(fromA, toA - fromA)
+          ytext.delete(fromA + adj, toA - fromA)
         }
         if (insertText.length > 0) {
-          ytext.insert(fromA, insertText)
+          ytext.insert(fromA + adj, insertText)
         }
+        adj += insertText.length - (toA - fromA)
       })
     }, this.conf)
   }
