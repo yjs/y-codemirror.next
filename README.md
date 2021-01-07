@@ -1,36 +1,69 @@
 # y-codemirror.next
 
-> [CodeMirror](https://codemirror.net/6) Binding for [Yjs](https://github.com/yjs/yjs) - [Demo](https://demos.yjs.dev/codemirror/codemirror.html)
+> [CodeMirror 6](https://codemirror.net/6) editor binding for [Yjs](https://github.com/yjs/yjs) - [Demo](https://demos.yjs.dev/codemirror/codemirror.html)
 
-This binding binds a [Y.Text](https://github.com/yjs/yjs#Shared-Types) to a CodeMirror editor.
+This binding binds a [Y.Text](https://docs.yjs.dev/api/shared-types/y.text) to a CodeMirror editor.
 
 ## Features
 
-* Sync CodeMirror editor
-* Shared Cursors
-* Shared Undo / Redo (each client has its own undo-/redo-history)
-* Successfully recovers when concurrents edit result in an invalid document schema
+* Sync CodeMirror 6 editor
+* Awareness: Render remote selection ranges and cursors - as a separate plugin
+* Shared Undo / Redo (each client has its own undo-/redo-history) - as a separate plugin
 
 ![CodeMirror Yjs Demo](https://user-images.githubusercontent.com/5553757/79250004-5ed1ac80-7e7e-11ea-81b8-9f833e2d8e66.gif)
 
 ### Example
 
 ```js
+/* eslint-env browser */
+
 import * as Y from 'yjs'
-import { CodemirrorBinding } from 'y-codemirror'
+// @ts-ignore
+import { yCollab } from 'y-codemirror.next'
 import { WebrtcProvider } from 'y-webrtc'
-import CodeMirror from 'codemirror'
+
+import { EditorState, EditorView, basicSetup } from '@codemirror/next/basic-setup'
+import { javascript } from '@codemirror/next/lang-javascript'
+// import { oneDark } from '@codemirror/next/theme-one-dark'
+
+import * as random from 'lib0/random.js'
+
+export const usercolors = [
+  { color: '#30bced', light: '#30bced33' },
+  { color: '#6eeb83', light: '#6eeb8333' },
+  { color: '#ffbc42', light: '#ffbc4233' },
+  { color: '#ecd444', light: '#ecd44433' },
+  { color: '#ee6352', light: '#ee635233' },
+  { color: '#9ac2c9', light: '#9ac2c933' },
+  { color: '#8acb88', light: '#8acb8833' },
+  { color: '#1be7ff', light: '#1be7ff33' }
+]
+
+// select a random color for this user
+export const userColor = usercolors[random.uint32() % usercolors.length]
 
 const ydoc = new Y.Doc()
-const provider = new WebrtcProvider('codemirror-demo-room', ydoc)
-const yText = ydoc.getText('codemirror')
+const provider = new WebrtcProvider('codemirror6-demo-room', ydoc)
+const ytext = ydoc.getText('codemirror')
 
-const editor = CodeMirror(editorDiv, {
-  mode: 'javascript',
-  lineNumbers: true
+provider.awareness.setLocalStateField('user', {
+  name: 'Anonymous ' + Math.floor(Math.random() * 100),
+  color: userColor.color,
+  colorLight: userColor.light
 })
 
-const binding = new CodemirrorBinding(yText, editor, provider.awareness)
+const state = EditorState.create({
+  doc: ytext.toString(),
+  extensions: [
+    basicSetup,
+    javascript(),
+    yCollab(ytext, provider.awareness)
+    // oneDark
+  ]
+})
+
+const view = new EditorView({ state, parent: /** @type {HTMLElement} */ (document.querySelector('#editor')) })
+
 ```
 
 Also look [here](https://github.com/yjs/yjs-demos/tree/master/codemirror) for a working example.
