@@ -1,6 +1,6 @@
 
 import * as Y from 'yjs'
-import { Facet, Annotation, AnnotationType } from '@codemirror/next/state' // eslint-disable-line
+import { Facet, Annotation, AnnotationType, SelectionRange, EditorSelection } from '@codemirror/next/state' // eslint-disable-line
 import { ViewPlugin, ViewUpdate, EditorView } from '@codemirror/next/view' // eslint-disable-line
 
 export class YSyncConfig {
@@ -8,6 +8,50 @@ export class YSyncConfig {
     this.ytext = ytext
     this.awareness = awareness
     this.undoManager = new Y.UndoManager(ytext)
+  }
+
+  /**
+   * @param {number} pos
+   * @param {number} [assoc]
+   */
+  toYPos (pos, assoc = 0) {
+    return Y.createRelativePositionFromTypeIndex(this.ytext, pos, assoc)
+  }
+
+  /**
+   * @param {Y.RelativePosition | Object} rpos
+   */
+  fromYPos (rpos) {
+    const pos = Y.createAbsolutePositionFromRelativePosition(Y.createRelativePositionFromJSON(rpos), this.ytext.doc)
+    if (pos == null || pos.type !== this.ytext) {
+      throw new Error('[y-codemirror] The position you want to retrieve was created by a different document')
+    }
+    return {
+      pos: pos.index,
+      assoc: pos.assoc
+    }
+  }
+
+  /**
+   * @param {SelectionRange} range
+   */
+  toYSelectionRange (range) {
+    const assoc = range.assoc
+    const yanchor = this.toYPos(range.anchor, assoc)
+    const yhead = this.toYPos(range.head, assoc)
+    return { yanchor, yhead }
+  }
+
+  /**
+   * @param {any} yrange
+   */
+  fromYSelectionRange (yrange) {
+    const anchor = this.fromYPos(yrange.yanchor)
+    const head = this.fromYPos(yrange.yhead)
+    if (anchor.pos === head.pos) {
+      return EditorSelection.cursor(head.pos, head.assoc)
+    }
+    return EditorSelection.range(anchor.pos, head.pos)
   }
 }
 

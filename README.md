@@ -10,6 +10,11 @@ This binding binds a [Y.Text](https://docs.yjs.dev/api/shared-types/y.text) to a
 * Awareness: Render remote selection ranges and cursors - as a separate plugin
 * Shared Undo / Redo (each client has its own undo-/redo-history) - as a separate plugin
 
+## TODO
+
+* undo plugin?
+* y-selections
+
 ![CodeMirror Yjs Demo](https://user-images.githubusercontent.com/5553757/79250004-5ed1ac80-7e7e-11ea-81b8-9f833e2d8e66.gif)
 
 ### Example
