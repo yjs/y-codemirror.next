@@ -19,7 +19,7 @@
     "dist": "npm run clean && rollup -c && tsc",
     "watch": "rollup -wc",
     "test": "npm run dist && node test/test.node.cjs",
-    "test-extensive": "npm run dist && node test/test.node.cjs --production --repitition-time 10000",
+    "test-extensive": "npm run dist && node test/test.node.cjs --production --repetition-time 10000",
     "lint": "standard && tsc",
     "preversion": "npm run lint && npm run test-extensive && npm run dist",
     "debug": "concurrently 'http-server -o test.html' 'npm run watch'",
