@@ -1,7 +1,7 @@
 
 import * as Y from 'yjs'
-import { Facet, Annotation, AnnotationType, SelectionRange, EditorSelection } from '@codemirror/next/state' // eslint-disable-line
-import { ViewPlugin, ViewUpdate, EditorView } from '@codemirror/next/view' // eslint-disable-line
+import { Facet, Annotation, AnnotationType, SelectionRange, EditorSelection } from '@codemirror/state' // eslint-disable-line
+import { ViewPlugin, ViewUpdate, EditorView } from '@codemirror/view' // eslint-disable-line
 
 export class YSyncConfig {
   constructor (ytext, awareness) {

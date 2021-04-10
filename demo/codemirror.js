@@ -5,8 +5,8 @@ import * as Y from 'yjs'
 import { yCollab } from 'y-codemirror.next'
 import { WebrtcProvider } from 'y-webrtc'
 
-import { EditorState, EditorView, basicSetup } from '@codemirror/next/basic-setup'
-import { javascript } from '@codemirror/next/lang-javascript'
+import { EditorState, EditorView, basicSetup } from '@codemirror/basic-setup'
+import { javascript } from '@codemirror/lang-javascript'
 // import { oneDark } from '@codemirror/next/theme-one-dark'
 
 import * as random from 'lib0/random.js'
@@ -25,7 +25,8 @@ export const usercolors = [
 export const userColor = usercolors[random.uint32() % usercolors.length]
 
 const ydoc = new Y.Doc()
-const provider = new WebrtcProvider('codemirror6-demo-room', ydoc)
+// const provider = new WebrtcProvider('codemirror6-demo-room', ydoc)
+const provider = new WebrtcProvider('codemirror6-demo-room-2', ydoc)
 const ytext = ydoc.getText('codemirror')
 
 provider.awareness.setLocalStateField('user', {

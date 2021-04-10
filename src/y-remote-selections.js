@@ -1,7 +1,8 @@
 
-import { ViewPlugin, ViewUpdate, EditorView, Decoration, themeClass, DecorationSet } from '@codemirror/next/view' // eslint-disable-line
-import { RangeSet, Range } from '@codemirror/next/rangeset' // eslint-disable-line
-import { Annotation, AnnotationType } from '@codemirror/next/state' // eslint-disable-line
+import { ViewPlugin, ViewUpdate, EditorView, Decoration, DecorationSet } from '@codemirror/view' // eslint-disable-line
+
+import { RangeSet, Range } from '@codemirror/rangeset' // eslint-disable-line
+import { Annotation, AnnotationType } from '@codemirror/state' // eslint-disable-line
 import * as dom from 'lib0/dom.js'
 import * as pair from 'lib0/pair.js'
 import * as math from 'lib0/math.js'
@@ -10,13 +11,13 @@ import * as Y from 'yjs'
 import { ySyncFacet } from './y-sync.js'
 
 export const yRemoteSelectionsTheme = EditorView.baseTheme({
-  $ySelection: {
+  '.cm-ySelection': {
   },
-  $yLineSelection: {
+  '.cm-yLineSelection': {
     padding: 0,
     margin: '0px 2px 0px 4px'
   },
-  $ySelectionCaret: {
+  '.cm-ySelectionCaret': {
     position: 'relative',
     borderLeft: '1px solid black',
     borderRight: '1px solid black',
@@ -25,7 +26,7 @@ export const yRemoteSelectionsTheme = EditorView.baseTheme({
     boxSizing: 'border-box',
     display: 'inline'
   },
-  '$ySelectionCaret::before': {
+  '.cm-ySelectionCaret::before': {
     content: '"\u00a0"', // this is a unicode non-breaking space
     borderRadius: '50%',
     position: 'absolute',
@@ -36,11 +37,11 @@ export const yRemoteSelectionsTheme = EditorView.baseTheme({
     backgroundColor: 'inherit',
     transition: 'transform .3s ease-in-out'
   },
-  '$ySelectionCaret:hover::before': {
+  '.cm-ySelectionCaret:hover::before': {
     transformOrigin: 'bottom center',
     transform: 'scale(0)'
   },
-  $ySelectionInfo: {
+  '.cm-ySelectionInfo': {
     position: 'absolute',
     top: '-1.05em',
     left: '-1px',
@@ -60,7 +61,7 @@ export const yRemoteSelectionsTheme = EditorView.baseTheme({
     opacity: 0,
     transitionDelay: '0s'
   },
-  '$ySelectionCaret:hover > $ySelectionInfo': {
+  '.cm-ySelectionCaret:hover > .cm-ySelectionInfo': {
     opacity: 1,
     transitionDelay: '0s'
   }
@@ -83,9 +84,9 @@ class YRemoteCaretWidget {
   }
 
   toDOM () {
-    return /** @type {HTMLElement} */ (dom.element('span', [pair.create('class', themeClass('ySelectionCaret')), pair.create('style', `background-color: ${this.color}; border-color: ${this.color}`)], [
+    return /** @type {HTMLElement} */ (dom.element('span', [pair.create('class', 'cm-ySelectionCaret'), pair.create('style', `background-color: ${this.color}; border-color: ${this.color}`)], [
       dom.element('div', [
-        pair.create('class', themeClass('ySelectionInfo'))
+        pair.create('class', 'cm-ySelectionInfo')
       ], [
         dom.text(this.name)
       ])
@@ -118,8 +119,11 @@ export class YRemoteSelectionsPluginValue {
   constructor (view) {
     this.conf = view.state.facet(ySyncFacet)
     this.conf.awareness.on('change', ({ added, updated, removed }, s, t) => {
+      const clients = added.concat(updated).concat(removed)
       console.log('y-awareness', { added, updated, removed }, s, t)
-      view.dispatch({ annotations: [yRemoteSelectionsAnnotation.of([])] })
+      if (clients.findIndex(id => id !== this.conf.awareness.doc.clientID) >= 0) {
+        view.dispatch({ annotations: [yRemoteSelectionsAnnotation.of([])] })
+      }
     })
     /**
      * @type {DecorationSet}
@@ -142,7 +146,7 @@ export class YRemoteSelectionsPluginValue {
 
     // set local awareness state (update cursors)
     if (localAwarenessState != null) {
-      const sel = update.state.selection.primary
+      const sel = update.state.selection.main
       const currentAnchor = localAwarenessState.cursor == null ? null : Y.createRelativePositionFromJSON(localAwarenessState.cursor.anchor)
       const currentHead = localAwarenessState.cursor == null ? null : Y.createRelativePositionFromJSON(localAwarenessState.cursor.head)
 
@@ -161,6 +165,7 @@ export class YRemoteSelectionsPluginValue {
           })
         }
       } else if (localAwarenessState.cursor != null) {
+        console.log('set local state to null')
         awareness.setLocalStateField('cursor', null)
       }
     }
@@ -192,7 +197,7 @@ export class YRemoteSelectionsPluginValue {
           to: end,
           value: Decoration.mark({
             attributes: { style: `background-color: ${colorLight}` },
-            class: themeClass('ySelection')
+            class: 'cm-ySelection'
           })
         })
       } else {
@@ -203,7 +208,7 @@ export class YRemoteSelectionsPluginValue {
           to: startLine.from + startLine.length,
           value: Decoration.mark({
             attributes: { style: `background-color: ${colorLight}` },
-            class: themeClass('ySelection')
+            class: 'cm-ySelection'
           })
         })
         // render text-selection in the last line
@@ -212,7 +217,7 @@ export class YRemoteSelectionsPluginValue {
           to: end,
           value: Decoration.mark({
             attributes: { style: `background-color: ${colorLight}` },
-            class: themeClass('ySelection')
+            class: 'cm-ySelection'
           })
         })
         for (let i = startLine.number + 1; i < endLine.number; i++) {
@@ -221,7 +226,7 @@ export class YRemoteSelectionsPluginValue {
             from: linePos,
             to: linePos,
             value: Decoration.line({
-              attributes: { style: `background-color: ${colorLight}`, class: themeClass('yLineSelection') }
+              attributes: { style: `background-color: ${colorLight}`, class: 'cm-yLineSelection' }
             })
           })
         }
