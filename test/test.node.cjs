@@ -7,11 +7,21 @@ const jsdom = require('jsdom')
 const documentContent = fs.readFileSync(path.join(__dirname, '../test.html'))
 const { window } = new jsdom.JSDOM(documentContent)
 
-global.window = window
-global.document = window.document
-global.innerHeight = 0
-global.navigator = {}
+;[
+  'window',
+  'innerHeight',
+  'document',
+  'Node',
+  'navigator',
+  'Text',
+  'HTMLElement',
+  'MutationObserver'
+].forEach(name => {
+  global[name] = window[name]
+})
 document.getSelection = () => ({ })
+global.requestAnimationFrame = f => setTimeout(f, 0)
+window.Element.prototype.scrollTo = () => {}
 
 document.createRange = () => ({
   setStart () {},

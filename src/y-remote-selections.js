@@ -3,9 +3,9 @@ import { ViewPlugin, ViewUpdate, EditorView, Decoration, DecorationSet } from '@
 
 import { RangeSet, Range } from '@codemirror/rangeset' // eslint-disable-line
 import { Annotation, AnnotationType } from '@codemirror/state' // eslint-disable-line
-import * as dom from 'lib0/dom.js'
-import * as pair from 'lib0/pair.js'
-import * as math from 'lib0/math.js'
+import * as dom from 'lib0/dom'
+import * as pair from 'lib0/pair'
+import * as math from 'lib0/math'
 
 import * as Y from 'yjs'
 import { ySyncFacet } from './y-sync.js'

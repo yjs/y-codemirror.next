@@ -1,12 +1,13 @@
 
-import * as t from 'lib0/testing.js'
-import * as prng from 'lib0/prng.js'
-import * as math from 'lib0/math.js'
+import * as t from 'lib0/testing'
+import * as prng from 'lib0/prng'
+import * as math from 'lib0/math'
 import * as Y from 'yjs' // eslint-disable-line
-import { EditorState, EditorView, basicSetup } from '@codemirror/next/basic-setup'
+import { EditorState, EditorView, basicSetup } from '@codemirror/basic-setup'
 
 import { applyRandomTests } from 'yjs/tests/testHelper.js'
 
+// @ts-ignore
 import { yCollab } from 'y-codemirror.next'
 
 /**
@@ -27,7 +28,7 @@ const createNewCodemirror = ydoc => {
 let charCounter = 0
 
 /**
- * @type {Array<function():{from:number,to:number,insert:string}>}
+ * @type {Array<function(Y.Doc, prng.PRNG, EditorView):{from:number,to:number,insert:string}>}
  */
 const trChange = [
   /**

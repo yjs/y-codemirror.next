@@ -26,7 +26,7 @@ import { EditorState, EditorView, basicSetup } from '@codemirror/next/basic-setu
 import { javascript } from '@codemirror/next/lang-javascript'
 // import { oneDark } from '@codemirror/next/theme-one-dark'
 
-import * as random from 'lib0/random.js'
+import * as random from 'lib0/random'
 
 export const usercolors = [
   { color: '#30bced', light: '#30bced33' },
