@@ -59,8 +59,8 @@ const minificationPlugins = process.env.PRODUCTION != null
       mangle: {
         toplevel: true
       }
-    })]
-  : []
+    })
+  ] : []
 
 export default [{
   input: './src/y-codemirror.js',

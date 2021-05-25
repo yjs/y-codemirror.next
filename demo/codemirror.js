@@ -2,10 +2,11 @@
 
 import * as Y from 'yjs'
 // @ts-ignore
-import { yCollab } from 'y-codemirror.next'
+import { yCollab, yUndoManagerKeymap } from 'y-codemirror.next'
 import { WebrtcProvider } from 'y-webrtc'
 
 import { EditorState, EditorView, basicSetup } from '@codemirror/basic-setup'
+import { keymap } from '@codemirror/view'
 import { javascript } from '@codemirror/lang-javascript'
 // import { oneDark } from '@codemirror/next/theme-one-dark'
 
@@ -38,6 +39,9 @@ provider.awareness.setLocalStateField('user', {
 const state = EditorState.create({
   doc: ytext.toString(),
   extensions: [
+    keymap.of([
+      ...yUndoManagerKeymap
+    ]),
     basicSetup,
     javascript(),
     yCollab(ytext, provider.awareness)

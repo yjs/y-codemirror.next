@@ -2,6 +2,7 @@
 import * as Y from 'yjs'
 import { Facet, Annotation, AnnotationType, SelectionRange, EditorSelection } from '@codemirror/state' // eslint-disable-line
 import { ViewPlugin, ViewUpdate, EditorView } from '@codemirror/view' // eslint-disable-line
+import { YRange } from './y-range'
 
 export class YSyncConfig {
   constructor (ytext, awareness) {
@@ -34,18 +35,19 @@ export class YSyncConfig {
 
   /**
    * @param {SelectionRange} range
+   * @return {YRange}
    */
-  toYSelectionRange (range) {
+  toYRange (range) {
     const assoc = range.assoc
     const yanchor = this.toYPos(range.anchor, assoc)
     const yhead = this.toYPos(range.head, assoc)
-    return { yanchor, yhead }
+    return new YRange(yanchor, yhead)
   }
 
   /**
-   * @param {any} yrange
+   * @param {YRange} yrange
    */
-  fromYSelectionRange (yrange) {
+  fromYRange (yrange) {
     const anchor = this.fromYPos(yrange.yanchor)
     const head = this.fromYPos(yrange.yhead)
     if (anchor.pos === head.pos) {
@@ -104,7 +106,7 @@ class YSyncPluginValue {
    * @param {ViewUpdate} update
    */
   update (update) {
-    if (update.transactions.length > 0 && update.transactions[0].annotation(ySyncAnnotation) === this.conf) {
+    if (!update.docChanged || (update.transactions.length > 0 && update.transactions[0].annotation(ySyncAnnotation) === this.conf)) {
       return
     }
     const ytext = this.conf.ytext
