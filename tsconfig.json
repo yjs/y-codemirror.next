@@ -13,10 +13,10 @@
     "moduleResolution": "node",            /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
     "baseUrl": "./",                       /* Base directory to resolve non-absolute module names. */
     "paths": {
-      "y-codemirror": ["./src/y-codemirror.js"]
+      "y-codemirror": ["src/index.js"]
     },
     "maxNodeModuleJsDepth": 0,
     "allowSyntheticDefaultImports": true
   },
-  "include": ["./src/y-codemirror.js", "./demo/codemirror.js"]
+  "include": ["src/index.js", "./demo/codemirror.js"]
 }

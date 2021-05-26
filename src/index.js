@@ -23,8 +23,8 @@ export const yCollab = (ytext, awareness, { undoManager = new Y.UndoManager(ytex
     syncConf,
     undoManagerConf,
     // yUndoManager must be included before the sync plugin
-    yUndoManager,
     ySync,
+    yUndoManager,
     EditorView.domEventHandlers({
       beforeinput (e, view) {
         if (e.inputType === 'historyUndo') return undo(view)

@@ -4,7 +4,7 @@ import {
 } from '@codemirror/state'
 
 import { ViewPlugin, ViewUpdate, KeyBinding, EditorView } from '@codemirror/view' // eslint-disable-line
-import { ySyncFacet } from './y-sync.js'
+import { ySyncFacet, ySyncAnnotation } from './y-sync.js'
 import { YRange } from './y-range.js' // eslint-disable-line
 import { createMutex } from 'lib0/mutex'
 
@@ -78,7 +78,7 @@ class YUndoManagerPluginValue {
 
     this._onStackItemAdded = ({ stackItem, changedParentTypes }) => {
       // only store metadata if this type was affected
-      if (changedParentTypes.has(this.syncConf.ytext) && this._beforeChangeSelection) {
+      if (changedParentTypes.has(this.syncConf.ytext) && this._beforeChangeSelection && !stackItem.meta.has(this)) { // do not overwrite previous stored selection
         stackItem.meta.set(this, this._beforeChangeSelection)
       }
     }
@@ -87,18 +87,15 @@ class YUndoManagerPluginValue {
       if (sel) {
         const selection = this.syncConf.fromYRange(sel)
         view.dispatch(view.state.update({ selection }))
-        this._beforeChange()
+        this._storeSelection()
       }
     }
     /**
      * Do this without mutex, simply use the sync annotation
      */
-    this._beforeChange = () => {
-      // update the the beforeChangeSelection that is stored befor each change to the editor (except when applying remote changes)
-      this._mux(() => {
-        // store the selection before the change is applied so we can restore it with the undo manager.
-        this._beforeChangeSelection = this.syncConf.toYRange(this.view.state.selection.main)
-      })
+    this._storeSelection = () => {
+      // store the selection before the change is applied so we can restore it with the undo manager.
+      this._beforeChangeSelection = this.syncConf.toYRange(this.view.state.selection.main)
     }
     this.conf.undoManager.on('stack-item-added', this._onStackItemAdded)
     this.conf.undoManager.on('stack-item-popped', this._onStackItemPopped)
@@ -108,8 +105,10 @@ class YUndoManagerPluginValue {
    * @param {ViewUpdate} update
    */
   update (update) {
-    // This only works when YUndoManagerPlugin is included before the sync plugin
-    this._beforeChange()
+    if (update.selectionSet && (update.transactions.length === 0 || update.transactions[0].annotation(ySyncAnnotation) !== this.syncConf)) {
+      // This only works when YUndoManagerPlugin is included before the sync plugin
+      this._storeSelection()
+    }
   }
 
   destroy () {

@@ -3,8 +3,9 @@
   "version": "2.0.9",
   "description": "CodeMirror6 binding for Yjs",
   "main": "./dist/y-codemirror.cjs",
-  "types": "./dist/src/y-codemirror.d.ts",
-  "module": "./src/y-codemirror.js",
+  "types": "./dist/src/index.d.ts",
+  "module": "./src/index.js",
+  "type": "module",
   "sideEffects": false,
   "funding": {
     "type": "GitHub Sponsors ❤",
@@ -14,6 +15,13 @@
     "dist/*",
     "src/*"
   ],
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./dist/y-codemirror.cjs"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
     "clean": "rm -rf dist",
     "dist": "npm run clean && rollup -c && tsc",
@@ -27,16 +35,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yjs/y-codemirror.git"
+    "url": "git+https://github.com/yjs/y-codemirror.next.git"
   },
   "keywords": [
     "Yjs"
   ],
   "author": "Kevin Jahns <kevin.jahns@protonmail.com>",
   "bugs": {
-    "url": "https://github.com/yjs/y-codemirror/issues"
+    "url": "https://github.com/yjs/y-codemirror.next/issues"
   },
-  "homepage": "https://github.com/yjs/y-codemirror#readme",
+  "homepage": "https://github.com/yjs/y-codemirror.next#readme",
   "peerDependencies": {
     "@codemirror/state": "^0.18.0",
     "@codemirror/view": "^0.18.0",

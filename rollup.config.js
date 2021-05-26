@@ -63,7 +63,7 @@ const minificationPlugins = process.env.PRODUCTION != null
   ] : []
 
 export default [{
-  input: './src/y-codemirror.js',
+  input: './src/index.js',
   external: id => /^(lib0|yjs|y-protocols|simple-peer)/.test(id),
   output: [{
     name: 'y-codemirror',

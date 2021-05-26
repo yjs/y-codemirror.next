@@ -120,7 +120,6 @@ export class YRemoteSelectionsPluginValue {
     this.conf = view.state.facet(ySyncFacet)
     this.conf.awareness.on('change', ({ added, updated, removed }, s, t) => {
       const clients = added.concat(updated).concat(removed)
-      console.log('y-awareness', { added, updated, removed }, s, t)
       if (clients.findIndex(id => id !== this.conf.awareness.doc.clientID) >= 0) {
         view.dispatch({ annotations: [yRemoteSelectionsAnnotation.of([])] })
       }
@@ -165,7 +164,6 @@ export class YRemoteSelectionsPluginValue {
           })
         }
       } else if (localAwarenessState.cursor != null) {
-        console.log('set local state to null')
         awareness.setLocalStateField('cursor', null)
       }
     }
