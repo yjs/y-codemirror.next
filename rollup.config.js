@@ -24,7 +24,7 @@ const customLibModules = new Set([
 const debugResolve = {
   resolveId (importee) {
     if (importee === 'y-codemirror.next') {
-      return `${process.cwd()}/src/y-codemirror.js`
+      return `${process.cwd()}/src/index.js`
     }
     if (importee === 'yjs/tests/testHelper.js') {
       return `${process.cwd()}/node_modules/yjs/tests/testHelper.js`

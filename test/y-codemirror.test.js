@@ -19,7 +19,7 @@ const createNewCodemirror = ydoc => {
     doc: ydoc.getText().toString(),
     extensions: [
       basicSetup,
-      yCollab(ydoc.getText())
+      yCollab(ydoc.getText(), null, { undoManager: false })
     ]
   })
   return new EditorView({ state })

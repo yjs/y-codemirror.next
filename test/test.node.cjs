@@ -22,6 +22,7 @@ const { window } = new jsdom.JSDOM(documentContent)
 document.getSelection = () => ({ })
 global.requestAnimationFrame = f => setTimeout(f, 0)
 window.Element.prototype.scrollTo = () => {}
+global.scrollTo = () => {}
 
 document.createRange = () => ({
   setStart () {},
