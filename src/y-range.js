@@ -1,5 +1,9 @@
 import * as Y from 'yjs'
 
+/**
+ * Defines a range on text using relative positions that can be transformed back to
+ * absolute positions. (https://docs.yjs.dev/api/relative-positions)
+ */
 export class YRange {
   /**
    * @param {Y.RelativePosition} yanchor
@@ -22,6 +26,7 @@ export class YRange {
 
   /**
    * @param {any} json
+   * @return {YRange}
    */
   static fromJSON (json) {
     return new YRange(Y.createRelativePositionFromJSON(json.yanchor), Y.createRelativePositionFromJSON(json.yhead))

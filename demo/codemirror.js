@@ -51,16 +51,5 @@ const state = EditorState.create({
 
 const view = new EditorView({ state, parent: /** @type {HTMLElement} */ (document.querySelector('#editor')) })
 
-const connectBtn = /** @type {HTMLElement} */ (document.getElementById('y-connect-btn'))
-connectBtn.addEventListener('click', () => {
-  if (provider.shouldConnect) {
-    provider.disconnect()
-    connectBtn.textContent = 'Connect'
-  } else {
-    provider.connect()
-    connectBtn.textContent = 'Disconnect'
-  }
-})
-
 // @ts-ignore
 window.example = { provider, ydoc, ytext, view }
