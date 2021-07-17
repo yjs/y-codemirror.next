@@ -2,7 +2,7 @@
 import * as Y from 'yjs'
 import { Facet, Annotation, AnnotationType, SelectionRange, EditorSelection } from '@codemirror/state' // eslint-disable-line
 import { ViewPlugin, ViewUpdate, EditorView } from '@codemirror/view' // eslint-disable-line
-import { YRange } from './y-range'
+import { YRange } from './y-range.js'
 
 export class YSyncConfig {
   constructor (ytext, awareness) {
