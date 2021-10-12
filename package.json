@@ -1,6 +1,6 @@
 {
   "name": "y-codemirror.next",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "CodeMirror6 binding for Yjs",
   "main": "./dist/y-codemirror.cjs",
   "types": "./dist/src/index.d.ts",
