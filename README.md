@@ -46,6 +46,8 @@ const ydoc = new Y.Doc()
 const provider = new WebrtcProvider('codemirror6-demo-room', ydoc)
 const ytext = ydoc.getText('codemirror')
 
+const undoManager = new Y.UndoManager(ytext)
+
 provider.awareness.setLocalStateField('user', {
   name: 'Anonymous ' + Math.floor(Math.random() * 100),
   color: userColor.color,
@@ -57,7 +59,7 @@ const state = EditorState.create({
   extensions: [
     basicSetup,
     javascript(),
-    yCollab(ytext, provider.awareness)
+    yCollab(ytext, provider.awareness, { undoManager })
     // oneDark
   ]
 })
