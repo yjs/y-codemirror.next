@@ -1,5 +1,5 @@
 
-import { ViewPlugin, ViewUpdate, EditorView, Decoration, DecorationSet } from '@codemirror/view' // eslint-disable-line
+import { ViewPlugin, ViewUpdate, EditorView, Decoration, DecorationSet, WidgetType } from '@codemirror/view' // eslint-disable-line
 
 import { RangeSet, Range } from '@codemirror/rangeset' // eslint-disable-line
 import { Annotation, AnnotationType } from '@codemirror/state' // eslint-disable-line
