@@ -1,5 +1,5 @@
 
-import { ViewPlugin, ViewUpdate, EditorView, Decoration, DecorationSet } from '@codemirror/view' // eslint-disable-line
+import { ViewPlugin, ViewUpdate, EditorView, Decoration, DecorationSet, WidgetType } from '@codemirror/view' // eslint-disable-line
 
 import { RangeSet, Range } from '@codemirror/rangeset' // eslint-disable-line
 import { Annotation, AnnotationType } from '@codemirror/state' // eslint-disable-line
@@ -73,12 +73,13 @@ export const yRemoteSelectionsTheme = EditorView.baseTheme({
  */
 const yRemoteSelectionsAnnotation = Annotation.define()
 
-class YRemoteCaretWidget {
+class YRemoteCaretWidget extends WidgetType {
   /**
    * @param {string} color
    * @param {string} name
    */
   constructor (color, name) {
+    super()
     this.color = color
     this.name = name
   }
