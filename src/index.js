@@ -1,7 +1,6 @@
 
 import * as Y from 'yjs' // eslint-disable-line
 import { EditorView } from '@codemirror/view'
-import { Extension } from '@codemirror/state' // eslint-disable-line
 
 import { ySync, ySyncFacet, YSyncConfig } from './y-sync.js'
 import { yRemoteSelections, yRemoteSelectionsTheme } from './y-remote-selections.js'
@@ -14,7 +13,7 @@ export { yRemoteSelections, yRemoteSelectionsTheme, ySync, ySyncFacet, YSyncConf
  * @param {any} awareness
  * @param {Object} [opts]
  * @param {Y.UndoManager | false} [opts.undoManager] Set undoManager to false to disable the undo-redo plugin
- * @return {Extension}
+ * @return {import('@codemirror/state').Extension}
  */
 export const yCollab = (ytext, awareness, { undoManager = new Y.UndoManager(ytext) } = {}) => {
   const plugins = [

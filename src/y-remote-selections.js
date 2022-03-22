@@ -1,12 +1,10 @@
 
-import { ViewPlugin, ViewUpdate, EditorView, Decoration, DecorationSet, WidgetType } from '@codemirror/view' // eslint-disable-line
-
+import { ViewPlugin, EditorView, Decoration, WidgetType } from '@codemirror/view' // eslint-disable-line
 import { RangeSet, Range } from '@codemirror/rangeset' // eslint-disable-line
 import { Annotation, AnnotationType } from '@codemirror/state' // eslint-disable-line
 import * as dom from 'lib0/dom'
 import * as pair from 'lib0/pair'
 import * as math from 'lib0/math'
-
 import * as Y from 'yjs'
 import { ySyncFacet } from './y-sync.js'
 
@@ -126,13 +124,13 @@ export class YRemoteSelectionsPluginValue {
       }
     })
     /**
-     * @type {DecorationSet}
+     * @type {import('@codemirror/view').DecorationSet}
      */
     this.decorations = RangeSet.of([])
   }
 
   /**
-   * @param {ViewUpdate} update
+   * @param {import('@codemirror/view').ViewUpdate} update
    */
   update (update) {
     const ytext = this.conf.ytext

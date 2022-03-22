@@ -1,9 +1,9 @@
 import * as Y from 'yjs' // eslint-disable-line
 import {
-  EditorState, StateCommand, Facet, Annotation, AnnotationType // eslint-disable-line
+  EditorState, Facet, Annotation, AnnotationType // eslint-disable-line
 } from '@codemirror/state'
 
-import { ViewPlugin, ViewUpdate, KeyBinding, EditorView } from '@codemirror/view' // eslint-disable-line
+import { ViewPlugin, EditorView } from '@codemirror/view' // eslint-disable-line
 import { ySyncFacet, ySyncAnnotation } from './y-sync.js'
 import { YRange } from './y-range.js' // eslint-disable-line
 import { createMutex } from 'lib0/mutex'
@@ -102,7 +102,7 @@ class YUndoManagerPluginValue {
   }
 
   /**
-   * @param {ViewUpdate} update
+   * @param {import('@codemirror/view').ViewUpdate} update
    */
   update (update) {
     if (update.selectionSet && (update.transactions.length === 0 || update.transactions[0].annotation(ySyncAnnotation) !== this.syncConf)) {
@@ -119,13 +119,13 @@ class YUndoManagerPluginValue {
 export const yUndoManager = ViewPlugin.fromClass(YUndoManagerPluginValue)
 
 /**
- * @type {StateCommand}
+ * @type {import('@codemirror/state').StateCommand}
  */
 export const undo = ({ state, dispatch }) =>
   state.facet(yUndoManagerFacet).undo() || true
 
 /**
- * @type {StateCommand}
+ * @type {import('@codemirror/state').StateCommand}
  */
 export const redo = ({ state, dispatch }) =>
   state.facet(yUndoManagerFacet).redo() || true
@@ -144,7 +144,7 @@ export const redoDepth = state => state.facet(yUndoManagerFacet).undoManager.red
 
 /**
  * Default key bindigs for the undo manager.
- * @type {Array<KeyBinding>}
+ * @type {Array<import('@codemirror/view').KeyBinding>}
  */
 export const yUndoManagerKeymap = [
   { key: 'Mod-z', run: undo, preventDefault: true },
