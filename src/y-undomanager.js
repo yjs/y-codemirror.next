@@ -20,14 +20,14 @@ export class YUndoManagerConfig {
    * @param {any} origin
    */
   addTrackedOrigin (origin) {
-    this.undoManager.trackedOrigins.add(origin)
+    this.undoManager.addTrackedOrigin(origin)
   }
 
   /**
    * @param {any} origin
    */
   removeTrackedOrigin (origin) {
-    this.undoManager.trackedOrigins.delete(origin)
+    this.undoManager.removeTrackedOrigin(origin)
   }
 
   /**

@@ -17,8 +17,9 @@ export { yRemoteSelections, yRemoteSelectionsTheme, ySync, ySyncFacet, YSyncConf
  * @return {Extension}
  */
 export const yCollab = (ytext, awareness, { undoManager = new Y.UndoManager(ytext) } = {}) => {
+  const ySyncConfig = new YSyncConfig(ytext, awareness)
   const plugins = [
-    ySyncFacet.of(new YSyncConfig(ytext, awareness)),
+    ySyncFacet.of(ySyncConfig),
     ySync
   ]
   if (awareness) {
@@ -29,7 +30,7 @@ export const yCollab = (ytext, awareness, { undoManager = new Y.UndoManager(ytex
   }
   if (undoManager !== false) {
     // By default, only track changes that are produced by the sync plugin (local edits)
-    undoManager.trackedOrigins.add(YSyncConfig)
+    undoManager.addTrackedOrigin(ySyncConfig)
     plugins.push(
       yUndoManagerFacet.of(new YUndoManagerConfig(undoManager)),
       yUndoManager,
