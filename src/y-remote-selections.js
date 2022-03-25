@@ -1,8 +1,8 @@
 
-import { ViewPlugin, ViewUpdate, EditorView, Decoration, DecorationSet, WidgetType } from '@codemirror/view' // eslint-disable-line
+import * as cmView from '@codemirror/view'
 
-import { RangeSet, Range } from '@codemirror/rangeset' // eslint-disable-line
-import { Annotation, AnnotationType } from '@codemirror/state' // eslint-disable-line
+import * as cmRangeSet from '@codemirror/rangeset'
+import * as cmState from '@codemirror/state'
 import * as dom from 'lib0/dom'
 import * as pair from 'lib0/pair'
 import * as math from 'lib0/math'
@@ -10,7 +10,7 @@ import * as math from 'lib0/math'
 import * as Y from 'yjs'
 import { ySyncFacet } from './y-sync.js'
 
-export const yRemoteSelectionsTheme = EditorView.baseTheme({
+export const yRemoteSelectionsTheme = cmView.EditorView.baseTheme({
   '.cm-ySelection': {
   },
   '.cm-yLineSelection': {
@@ -69,11 +69,11 @@ export const yRemoteSelectionsTheme = EditorView.baseTheme({
 
 /**
  * @todo specify the users that actually changed. Currently, we recalculate positions for every user.
- * @type {AnnotationType<Array<number>>}
+ * @type {cmState.AnnotationType<Array<number>>}
  */
-const yRemoteSelectionsAnnotation = Annotation.define()
+const yRemoteSelectionsAnnotation = cmState.Annotation.define()
 
-class YRemoteCaretWidget extends WidgetType {
+class YRemoteCaretWidget extends cmView.WidgetType {
   /**
    * @param {string} color
    * @param {string} name
@@ -115,7 +115,7 @@ class YRemoteCaretWidget extends WidgetType {
 
 export class YRemoteSelectionsPluginValue {
   /**
-   * @param {EditorView} view
+   * @param {cmView.EditorView} view
    */
   constructor (view) {
     this.conf = view.state.facet(ySyncFacet)
@@ -126,20 +126,20 @@ export class YRemoteSelectionsPluginValue {
       }
     })
     /**
-     * @type {DecorationSet}
+     * @type {cmView.DecorationSet}
      */
-    this.decorations = RangeSet.of([])
+    this.decorations = cmRangeSet.RangeSet.of([])
   }
 
   /**
-   * @param {ViewUpdate} update
+   * @param {cmView.ViewUpdate} update
    */
   update (update) {
     const ytext = this.conf.ytext
     const ydoc = /** @type {Y.Doc} */ (ytext.doc)
     const awareness = this.conf.awareness
     /**
-     * @type {Array<Range<Decoration>>}
+     * @type {Array<cmRangeSet.Range<cmView.Decoration>>}
      */
     const decorations = []
     const localAwarenessState = this.conf.awareness.getLocalState()
@@ -194,7 +194,7 @@ export class YRemoteSelectionsPluginValue {
         decorations.push({
           from: start,
           to: end,
-          value: Decoration.mark({
+          value: cmView.Decoration.mark({
             attributes: { style: `background-color: ${colorLight}` },
             class: 'cm-ySelection'
           })
@@ -205,7 +205,7 @@ export class YRemoteSelectionsPluginValue {
         decorations.push({
           from: start,
           to: startLine.from + startLine.length,
-          value: Decoration.mark({
+          value: cmView.Decoration.mark({
             attributes: { style: `background-color: ${colorLight}` },
             class: 'cm-ySelection'
           })
@@ -214,7 +214,7 @@ export class YRemoteSelectionsPluginValue {
         decorations.push({
           from: endLine.from,
           to: end,
-          value: Decoration.mark({
+          value: cmView.Decoration.mark({
             attributes: { style: `background-color: ${colorLight}` },
             class: 'cm-ySelection'
           })
@@ -224,7 +224,7 @@ export class YRemoteSelectionsPluginValue {
           decorations.push({
             from: linePos,
             to: linePos,
-            value: Decoration.line({
+            value: cmView.Decoration.line({
               attributes: { style: `background-color: ${colorLight}`, class: 'cm-yLineSelection' }
             })
           })
@@ -233,17 +233,17 @@ export class YRemoteSelectionsPluginValue {
       decorations.push({
         from: head.index,
         to: head.index,
-        value: Decoration.widget({
+        value: cmView.Decoration.widget({
           side: head.index - anchor.index > 0 ? -1 : 1, // the local cursor should be rendered outside the remote selection
           block: false,
           widget: new YRemoteCaretWidget(color, name)
         })
       })
     })
-    this.decorations = Decoration.set(decorations, true)
+    this.decorations = cmView.Decoration.set(decorations, true)
   }
 }
 
-export const yRemoteSelections = ViewPlugin.fromClass(YRemoteSelectionsPluginValue, {
+export const yRemoteSelections = cmView.ViewPlugin.fromClass(YRemoteSelectionsPluginValue, {
   decorations: v => v.decorations
 })

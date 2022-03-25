@@ -1,7 +1,7 @@
 
 import * as Y from 'yjs' // eslint-disable-line
-import { EditorView } from '@codemirror/view'
-import { Extension } from '@codemirror/state' // eslint-disable-line
+import * as cmView from '@codemirror/view'
+import * as cmState from '@codemirror/state' // eslint-disable-line
 
 import { ySync, ySyncFacet, YSyncConfig } from './y-sync.js'
 import { yRemoteSelections, yRemoteSelectionsTheme } from './y-remote-selections.js'
@@ -14,7 +14,7 @@ export { yRemoteSelections, yRemoteSelectionsTheme, ySync, ySyncFacet, YSyncConf
  * @param {any} awareness
  * @param {Object} [opts]
  * @param {Y.UndoManager | false} [opts.undoManager] Set undoManager to false to disable the undo-redo plugin
- * @return {Extension}
+ * @return {cmState.Extension}
  */
 export const yCollab = (ytext, awareness, { undoManager = new Y.UndoManager(ytext) } = {}) => {
   const ySyncConfig = new YSyncConfig(ytext, awareness)
@@ -34,7 +34,7 @@ export const yCollab = (ytext, awareness, { undoManager = new Y.UndoManager(ytex
     plugins.push(
       yUndoManagerFacet.of(new YUndoManagerConfig(undoManager)),
       yUndoManager,
-      EditorView.domEventHandlers({
+      cmView.EditorView.domEventHandlers({
         beforeinput (e, view) {
           if (e.inputType === 'historyUndo') return undo(view)
           if (e.inputType === 'historyRedo') return redo(view)

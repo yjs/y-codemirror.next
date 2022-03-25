@@ -1,7 +1,7 @@
 
 import * as Y from 'yjs'
-import { Facet, Annotation, AnnotationType, SelectionRange, EditorSelection } from '@codemirror/state' // eslint-disable-line
-import { ViewPlugin, ViewUpdate, EditorView } from '@codemirror/view' // eslint-disable-line
+import * as cmState from '@codemirror/state' // eslint-disable-line
+import * as cmView from '@codemirror/view' // eslint-disable-line
 import { YRange } from './y-range.js'
 
 export class YSyncConfig {
@@ -57,7 +57,7 @@ export class YSyncConfig {
   }
 
   /**
-   * @param {SelectionRange} range
+   * @param {cmState.SelectionRange} range
    * @return {YRange}
    */
   toYRange (range) {
@@ -74,32 +74,32 @@ export class YSyncConfig {
     const anchor = this.fromYPos(yrange.yanchor)
     const head = this.fromYPos(yrange.yhead)
     if (anchor.pos === head.pos) {
-      return EditorSelection.cursor(head.pos, head.assoc)
+      return cmState.EditorSelection.cursor(head.pos, head.assoc)
     }
-    return EditorSelection.range(anchor.pos, head.pos)
+    return cmState.EditorSelection.range(anchor.pos, head.pos)
   }
 }
 
 /**
- * @type {Facet<YSyncConfig, YSyncConfig>}
+ * @type {cmState.Facet<YSyncConfig, YSyncConfig>}
  */
-export const ySyncFacet = Facet.define({
+export const ySyncFacet = cmState.Facet.define({
   combine (inputs) {
     return inputs[inputs.length - 1]
   }
 })
 
 /**
- * @type {AnnotationType<YSyncConfig>}
+ * @type {cmState.AnnotationType<YSyncConfig>}
  */
-export const ySyncAnnotation = Annotation.define()
+export const ySyncAnnotation = cmState.Annotation.define()
 
 /**
  * @extends {PluginValue}
  */
 class YSyncPluginValue {
   /**
-   * @param {EditorView} view
+   * @param {cmView.EditorView} view
    */
   constructor (view) {
     this.view = view
@@ -126,7 +126,7 @@ class YSyncPluginValue {
   }
 
   /**
-   * @param {ViewUpdate} update
+   * @param {cmView.ViewUpdate} update
    */
   update (update) {
     if (!update.docChanged || (update.transactions.length > 0 && update.transactions[0].annotation(ySyncAnnotation) === this.conf)) {
@@ -156,4 +156,4 @@ class YSyncPluginValue {
   }
 }
 
-export const ySync = ViewPlugin.fromClass(YSyncPluginValue)
+export const ySync = cmView.ViewPlugin.fromClass(YSyncPluginValue)

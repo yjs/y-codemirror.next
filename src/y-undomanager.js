@@ -1,9 +1,7 @@
 import * as Y from 'yjs' // eslint-disable-line
-import {
-  EditorState, StateCommand, Facet, Annotation, AnnotationType // eslint-disable-line
-} from '@codemirror/state'
+import * as cmState from '@codemirror/state'
 
-import { ViewPlugin, ViewUpdate, KeyBinding, EditorView } from '@codemirror/view' // eslint-disable-line
+import * as cmView from '@codemirror/view'
 import { ySyncFacet, ySyncAnnotation } from './y-sync.js'
 import { YRange } from './y-range.js' // eslint-disable-line
 import { createMutex } from 'lib0/mutex'
@@ -46,25 +44,25 @@ export class YUndoManagerConfig {
 }
 
 /**
- * @type {Facet<YUndoManagerConfig, YUndoManagerConfig>}
+ * @type {cmState.Facet<YUndoManagerConfig, YUndoManagerConfig>}
  */
-export const yUndoManagerFacet = Facet.define({
+export const yUndoManagerFacet = cmState.Facet.define({
   combine (inputs) {
     return inputs[inputs.length - 1]
   }
 })
 
 /**
- * @type {AnnotationType<YUndoManagerConfig>}
+ * @type {cmState.AnnotationType<YUndoManagerConfig>}
  */
-export const yUndoManagerAnnotation = Annotation.define()
+export const yUndoManagerAnnotation = cmState.Annotation.define()
 
 /**
  * @extends {PluginValue}
  */
 class YUndoManagerPluginValue {
   /**
-   * @param {EditorView} view
+   * @param {cmView.EditorView} view
    */
   constructor (view) {
     this.view = view
@@ -102,7 +100,7 @@ class YUndoManagerPluginValue {
   }
 
   /**
-   * @param {ViewUpdate} update
+   * @param {cmView.ViewUpdate} update
    */
   update (update) {
     if (update.selectionSet && (update.transactions.length === 0 || update.transactions[0].annotation(ySyncAnnotation) !== this.syncConf)) {
@@ -116,35 +114,35 @@ class YUndoManagerPluginValue {
     this.conf.undoManager.off('stack-item-popped', this._onStackItemPopped)
   }
 }
-export const yUndoManager = ViewPlugin.fromClass(YUndoManagerPluginValue)
+export const yUndoManager = cmView.ViewPlugin.fromClass(YUndoManagerPluginValue)
 
 /**
- * @type {StateCommand}
+ * @type {cmState.StateCommand}
  */
 export const undo = ({ state, dispatch }) =>
   state.facet(yUndoManagerFacet).undo() || true
 
 /**
- * @type {StateCommand}
+ * @type {cmState.StateCommand}
  */
 export const redo = ({ state, dispatch }) =>
   state.facet(yUndoManagerFacet).redo() || true
 
 /**
- * @param {EditorState} state
+ * @param {cmState.EditorState} state
  * @return {number}
  */
 export const undoDepth = state => state.facet(yUndoManagerFacet).undoManager.undoStack.length
 
 /**
- * @param {EditorState} state
+ * @param {cmState.EditorState} state
  * @return {number}
  */
 export const redoDepth = state => state.facet(yUndoManagerFacet).undoManager.redoStack.length
 
 /**
  * Default key bindigs for the undo manager.
- * @type {Array<KeyBinding>}
+ * @type {Array<cmView.KeyBinding>}
  */
 export const yUndoManagerKeymap = [
   { key: 'Mod-z', run: undo, preventDefault: true },
