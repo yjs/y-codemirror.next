@@ -104,7 +104,7 @@ class YSyncPluginValue {
   constructor (view) {
     this.view = view
     this.conf = view.state.facet(ySyncFacet)
-    this.conf.ytext.observe((event, tr) => {
+    this._observer = (event, tr) => {
       if (tr.origin !== this.conf) {
         const delta = event.delta
         const changes = []
@@ -122,7 +122,9 @@ class YSyncPluginValue {
         }
         view.dispatch({ changes, annotations: [ySyncAnnotation.of(this.conf)] })
       }
-    })
+    }
+    this._ytext = this.conf.ytext
+    this._ytext.observe(this._observer)
   }
 
   /**
@@ -152,7 +154,7 @@ class YSyncPluginValue {
   }
 
   destroy () {
-    // @todo
+    this._ytext.unobserve(this._observer)
   }
 }
 
