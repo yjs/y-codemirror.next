@@ -67,6 +67,7 @@ class YUndoManagerPluginValue {
   constructor (view) {
     this.view = view
     this.conf = view.state.facet(yUndoManagerFacet)
+    this._undoManager = this.conf.undoManager
     this.syncConf = view.state.facet(ySyncFacet)
     /**
      * @type {null | YRange}
@@ -95,8 +96,9 @@ class YUndoManagerPluginValue {
       // store the selection before the change is applied so we can restore it with the undo manager.
       this._beforeChangeSelection = this.syncConf.toYRange(this.view.state.selection.main)
     }
-    this.conf.undoManager.on('stack-item-added', this._onStackItemAdded)
-    this.conf.undoManager.on('stack-item-popped', this._onStackItemPopped)
+    this._undoManager.on('stack-item-added', this._onStackItemAdded)
+    this._undoManager.on('stack-item-popped', this._onStackItemPopped)
+    this._undoManager.addTrackedOrigin(this.syncConf)
   }
 
   /**
@@ -110,8 +112,9 @@ class YUndoManagerPluginValue {
   }
 
   destroy () {
-    this.conf.undoManager.off('stack-item-added', this._onStackItemAdded)
-    this.conf.undoManager.off('stack-item-popped', this._onStackItemPopped)
+    this._undoManager.off('stack-item-added', this._onStackItemAdded)
+    this._undoManager.off('stack-item-popped', this._onStackItemPopped)
+    this._undoManager.removeTrackedOrigin(this.syncConf)
   }
 }
 export const yUndoManager = cmView.ViewPlugin.fromClass(YUndoManagerPluginValue)

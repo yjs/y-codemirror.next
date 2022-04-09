@@ -30,7 +30,6 @@ export const yCollab = (ytext, awareness, { undoManager = new Y.UndoManager(ytex
   }
   if (undoManager !== false) {
     // By default, only track changes that are produced by the sync plugin (local edits)
-    undoManager.addTrackedOrigin(ySyncConfig)
     plugins.push(
       yUndoManagerFacet.of(new YUndoManagerConfig(undoManager)),
       yUndoManager,
