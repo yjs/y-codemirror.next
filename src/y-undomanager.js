@@ -149,5 +149,6 @@ export const redoDepth = state => state.facet(yUndoManagerFacet).undoManager.red
  */
 export const yUndoManagerKeymap = [
   { key: 'Mod-z', run: undo, preventDefault: true },
-  { key: 'Mod-y', mac: 'Mod-Shift-z', run: redo, preventDefault: true }
+  { key: 'Mod-y', mac: 'Mod-Shift-z', run: redo, preventDefault: true },
+  { key: 'Mod-Shift-z', run: redo, preventDefault: true }
 ]
