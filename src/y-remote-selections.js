@@ -26,8 +26,8 @@ export const yRemoteSelectionsTheme = cmView.EditorView.baseTheme({
     boxSizing: 'border-box',
     display: 'inline'
   },
-  '.cm-ySelectionCaret::before': {
-    content: '"\u00a0"', // this is a unicode non-breaking space
+  '.cm-ySelectionCaretTop::before': {
+    content: '"\u2060"', // this is a unicode non-breaking space
     borderRadius: '50%',
     position: 'absolute',
     width: '.4em',
@@ -37,9 +37,15 @@ export const yRemoteSelectionsTheme = cmView.EditorView.baseTheme({
     backgroundColor: 'inherit',
     transition: 'transform .3s ease-in-out'
   },
-  '.cm-ySelectionCaret:hover::before': {
+  '.cm-ySelectionCaret:hover .cm-ySelectionCaretTop::before': {
     transformOrigin: 'bottom center',
     transform: 'scale(0)'
+  },
+  '.cm-ySelectionCaretTop': {
+    backgroundColor: 'inherit',
+    position: 'absolute',
+    top: 0,
+    left: 0
   },
   '.cm-ySelectionInfo': {
     position: 'absolute',
@@ -86,11 +92,17 @@ class YRemoteCaretWidget extends cmView.WidgetType {
 
   toDOM () {
     return /** @type {HTMLElement} */ (dom.element('span', [pair.create('class', 'cm-ySelectionCaret'), pair.create('style', `background-color: ${this.color}; border-color: ${this.color}`)], [
-      dom.element('div', [
-        pair.create('class', 'cm-ySelectionInfo')
-      ], [
-        dom.text(this.name)
-      ])
+        dom.text('\u2060'),
+        dom.element('div', [
+          pair.create('class', 'cm-ySelectionCaretTop')
+        ]),
+        dom.text('\u2060'),
+        dom.element('div', [
+          pair.create('class', 'cm-ySelectionInfo')
+        ], [
+          dom.text(this.name)
+        ]),
+        dom.text('\u2060')
     ]))
   }
 
