@@ -44,6 +44,7 @@ const state = EditorState.create({
     ]),
     basicSetup,
     javascript(),
+    EditorView.lineWrapping,
     yCollab(ytext, provider.awareness)
     // oneDark
   ]
