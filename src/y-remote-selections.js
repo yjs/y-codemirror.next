@@ -1,7 +1,6 @@
 
 import * as cmView from '@codemirror/view'
 
-import * as cmRangeSet from '@codemirror/rangeset'
 import * as cmState from '@codemirror/state'
 import * as dom from 'lib0/dom'
 import * as pair from 'lib0/pair'
@@ -137,7 +136,7 @@ export class YRemoteSelectionsPluginValue {
     /**
      * @type {cmView.DecorationSet}
      */
-    this.decorations = cmRangeSet.RangeSet.of([])
+    this.decorations = cmState.RangeSet.of([])
   }
 
   destroy () {
@@ -152,7 +151,7 @@ export class YRemoteSelectionsPluginValue {
     const ydoc = /** @type {Y.Doc} */ (ytext.doc)
     const awareness = this.conf.awareness
     /**
-     * @type {Array<cmRangeSet.Range<cmView.Decoration>>}
+     * @type {Array<cmState.Range<cmView.Decoration>>}
      */
     const decorations = []
     const localAwarenessState = this.conf.awareness.getLocalState()
