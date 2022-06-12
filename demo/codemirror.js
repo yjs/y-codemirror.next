@@ -5,12 +5,13 @@ import * as Y from 'yjs'
 import { yCollab, yUndoManagerKeymap } from 'y-codemirror.next'
 import { WebrtcProvider } from 'y-webrtc'
 
-import { EditorState, EditorView, basicSetup } from '@codemirror/basic-setup'
+import { EditorView, basicSetup } from 'codemirror'
 import { keymap } from '@codemirror/view'
 import { javascript } from '@codemirror/lang-javascript'
 // import { oneDark } from '@codemirror/next/theme-one-dark'
 
 import * as random from 'lib0/random'
+import { EditorState } from '@codemirror/state'
 
 export const usercolors = [
   { color: '#30bced', light: '#30bced33' },
