@@ -3,7 +3,8 @@ import * as t from 'lib0/testing'
 import * as prng from 'lib0/prng'
 import * as math from 'lib0/math'
 import * as Y from 'yjs' // eslint-disable-line
-import { EditorState, EditorView, basicSetup } from '@codemirror/basic-setup'
+import { EditorView, basicSetup } from 'codemirror'
+import { EditorState } from '@codemirror/state'
 
 import { applyRandomTests } from 'yjs/tests/testHelper.js'
 
