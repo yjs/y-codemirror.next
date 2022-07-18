@@ -22,9 +22,9 @@ import * as Y from 'yjs'
 import { yCollab } from 'y-codemirror.next'
 import { WebrtcProvider } from 'y-webrtc'
 
-import { EditorState, EditorView, basicSetup } from '@codemirror/next/basic-setup'
-import { javascript } from '@codemirror/next/lang-javascript'
-// import { oneDark } from '@codemirror/next/theme-one-dark'
+import { EditorView, basicSetup } from "codemirror";
+import { EditorState } from "@codemirror/state";
+import { javascript } from '@codemirror/lang-javascript'
 
 import * as random from 'lib0/random'
 
@@ -60,7 +60,6 @@ const state = EditorState.create({
     basicSetup,
     javascript(),
     yCollab(ytext, provider.awareness, { undoManager })
-    // oneDark
   ]
 })
 
