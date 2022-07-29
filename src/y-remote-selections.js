@@ -158,15 +158,10 @@ export class YRemoteSelectionsPluginValue {
 
     // set local awareness state (update cursors)
     if (localAwarenessState != null) {
-      const sel = update.state.selection.main
+      const sel = update.view.hasFocus && update.view.dom.ownerDocument.hasFocus() ? update.state.selection.main : null
       const currentAnchor = localAwarenessState.cursor == null ? null : Y.createRelativePositionFromJSON(localAwarenessState.cursor.anchor)
       const currentHead = localAwarenessState.cursor == null ? null : Y.createRelativePositionFromJSON(localAwarenessState.cursor.head)
 
-      /*
-      if (!update.view.hasFocus || !update.view.dom.ownerDocument.hasFocus()) {
-        sel = null
-      }
-      */
       if (sel != null) {
         const anchor = Y.createRelativePositionFromTypeIndex(ytext, sel.anchor)
         const head = Y.createRelativePositionFromTypeIndex(ytext, sel.head)
