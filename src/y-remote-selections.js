@@ -10,6 +10,9 @@ import * as Y from 'yjs'
 import { ySyncFacet } from './y-sync.js'
 
 export const yRemoteSelectionsTheme = cmView.EditorView.baseTheme({
+  '.cm-scroller': {
+	  overflow: 'visible'
+  },
   '.cm-ySelection': {
   },
   '.cm-yLineSelection': {
