@@ -1,6 +1,6 @@
 # y-codemirror.next
 
-> [CodeMirror 6](https://codemirror.net/6) editor binding for [Yjs](https://github.com/yjs/yjs) - [Demo](https://demos.yjs.dev/codemirror.next/codemirror.next.html)
+> [CodeMirror 6](https://codemirror.net/) editor binding for [Yjs](https://github.com/yjs/yjs) - [Demo](https://demos.yjs.dev/codemirror.next/codemirror.next.html)
 
 This binding binds a [Y.Text](https://docs.yjs.dev/api/shared-types/y.text) to a CodeMirror editor.
 
