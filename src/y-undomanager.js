@@ -11,7 +11,6 @@ export class YUndoManagerConfig {
    * @param {Y.UndoManager} undoManager
    */
   constructor (undoManager) {
-    console.debug("YUndoManagerConfig");
     this.undoManager = undoManager
   }
 
