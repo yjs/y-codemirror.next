@@ -11,6 +11,7 @@ export class YUndoManagerConfig {
    * @param {Y.UndoManager} undoManager
    */
   constructor (undoManager) {
+    console.debug("YUndoManagerConfig");
     this.undoManager = undoManager
   }
 
@@ -18,14 +19,14 @@ export class YUndoManagerConfig {
    * @param {any} origin
    */
   addTrackedOrigin (origin) {
-    this.undoManager.addTrackedOrigin(origin)
+    this.undoManager.trackedOrigins.add(origin)
   }
 
   /**
    * @param {any} origin
    */
   removeTrackedOrigin (origin) {
-    this.undoManager.removeTrackedOrigin(origin)
+    this.undoManager.trackedOrigins.delete(origin)
   }
 
   /**
@@ -98,7 +99,7 @@ class YUndoManagerPluginValue {
     }
     this._undoManager.on('stack-item-added', this._onStackItemAdded)
     this._undoManager.on('stack-item-popped', this._onStackItemPopped)
-    this._undoManager.addTrackedOrigin(this.syncConf)
+    this._undoManager.trackedOrigins.add(this.syncConf)
   }
 
   /**
@@ -114,7 +115,7 @@ class YUndoManagerPluginValue {
   destroy () {
     this._undoManager.off('stack-item-added', this._onStackItemAdded)
     this._undoManager.off('stack-item-popped', this._onStackItemPopped)
-    this._undoManager.removeTrackedOrigin(this.syncConf)
+    this._undoManager.trackedOrigins.delete(this.syncConf)
   }
 }
 export const yUndoManager = cmView.ViewPlugin.fromClass(YUndoManagerPluginValue)
