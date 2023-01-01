@@ -18,6 +18,7 @@
   "exports": {
     ".": {
       "import": "./src/index.js",
+      "module": "./src/index.js",
       "require": "./dist/y-codemirror.cjs"
     },
     "./package.json": "./package.json"
