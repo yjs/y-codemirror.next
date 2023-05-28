@@ -214,7 +214,7 @@ export class YRemoteSelectionsPluginValue {
           from: start,
           to: startLine.from + startLine.length,
           value: cmView.Decoration.mark({
-            attributes: { style: `background-color: ${colorLight}` },
+            attributes: { style: `background-color: ${colorLight}; --y-line-selection-color: ${colorLight};` },
             class: 'cm-ySelection'
           })
         })
@@ -223,19 +223,35 @@ export class YRemoteSelectionsPluginValue {
           from: endLine.from,
           to: end,
           value: cmView.Decoration.mark({
-            attributes: { style: `background-color: ${colorLight}` },
+            attributes: { style: `background-color: ${colorLight}; --y-line-selection-color: ${colorLight};` },
             class: 'cm-ySelection'
           })
         })
         for (let i = startLine.number + 1; i < endLine.number; i++) {
-          const linePos = update.view.state.doc.line(i).from
-          decorations.push({
-            from: linePos,
-            to: linePos,
-            value: cmView.Decoration.line({
-              attributes: { style: `background-color: ${colorLight}`, class: 'cm-yLineSelection' }
+          const lineStart = update.view.state.doc.line(i).from;
+          const lineEnd = update.view.state.doc.line(i).to;
+          if (update.view.state.doc.line(i).text.length === 0) {
+            decorations.push({
+              from: lineStart,
+              to: lineEnd,
+              value: cmView.Decoration.line({
+                attributes: { style: `background-color: ${colorLight}; --y-line-selection-color: ${colorLight};`, class: 'cm-yLineSelection cm-yLineSelection-empty' }
+              })
             })
-          })
+          } else {
+            decorations.push({
+              from: lineStart,
+              to: lineEnd,
+              value: cmView.Decoration.mark({
+                attributes: {
+                  style: `background-color: ${colorLight}; --y-line-selection-color: ${colorLight};`,
+                },
+                class: "cm-yLineSelection",
+                tagName: "span",
+                inclusive: true,
+              })
+            })
+          }
         }
       }
       decorations.push({
