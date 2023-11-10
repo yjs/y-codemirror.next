@@ -15,14 +15,16 @@ export { YRange, yRemoteSelections, yRemoteSelectionsTheme, ySync, ySyncFacet, Y
  * @param {any} awareness
  * @param {Object} [opts]
  * @param {Y.UndoManager | false} [opts.undoManager] Set undoManager to false to disable the undo-redo plugin
+ * @param {((u: any) => { name: String, colorLight: String, color: String }) | false} [opts.getUserInfo] Optional fn to take user awareness state info and transform into name + color(s)
  * @return {cmState.Extension}
  */
-export const yCollab = (ytext, awareness, { undoManager = new Y.UndoManager(ytext) } = {}) => {
-  const ySyncConfig = new YSyncConfig(ytext, awareness)
+export const yCollab = (ytext, awareness, { undoManager = new Y.UndoManager(ytext), getUserInfo = false } = {}) => {
+  const ySyncConfig = new YSyncConfig(ytext, awareness, getUserInfo)
   const plugins = [
     ySyncFacet.of(ySyncConfig),
     ySync
   ]
+
   if (awareness) {
     plugins.push(
       yRemoteSelectionsTheme,
