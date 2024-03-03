@@ -19,7 +19,8 @@
     ".": {
       "import": "./src/index.js",
       "module": "./src/index.js",
-      "require": "./dist/y-codemirror.cjs"
+      "require": "./dist/y-codemirror.cjs",
+      "types": "./dist/src/index.d.ts"
     },
     "./package.json": "./package.json"
   },
