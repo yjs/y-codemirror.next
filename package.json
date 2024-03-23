@@ -42,6 +42,8 @@
     "Yjs"
   ],
   "author": "Kevin Jahns <kevin.jahns@protonmail.com>",
+  "email": "kevin.jahns@protonmail.com",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/yjs/y-codemirror.next/issues"
   },
