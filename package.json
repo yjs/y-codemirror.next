@@ -1,6 +1,6 @@
 {
   "name": "y-codemirror.next",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "CodeMirror6 binding for Yjs",
   "main": "./dist/y-codemirror.cjs",
   "types": "./dist/src/index.d.ts",
@@ -43,6 +43,8 @@
     "Yjs"
   ],
   "author": "Kevin Jahns <kevin.jahns@protonmail.com>",
+  "email": "kevin.jahns@protonmail.com",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/yjs/y-codemirror.next/issues"
   },
