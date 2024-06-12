@@ -191,8 +191,11 @@ export class YRemoteSelectionsPluginValue {
       if (anchor == null || head == null || anchor.type !== ytext || head.type !== ytext) {
         return
       }
-      const { color = '#30bced', name = 'Anonymous' } = state.user || {}
-      const colorLight = (state.user && state.user.colorLight) || color + '33'
+
+      const userColorAndName = this.conf.getUserInfo ? this.conf.getUserInfo(state.user) : state.user
+      const color = userColorAndName?.color || '#30bced'
+      const name = userColorAndName?.name || 'Anonymous'
+      const colorLight = userColorAndName.colorLight || color + '33'
       const start = math.min(anchor.index, head.index)
       const end = math.max(anchor.index, head.index)
       const startLine = update.view.state.doc.lineAt(start)
