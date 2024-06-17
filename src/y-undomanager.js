@@ -122,14 +122,28 @@ export const yUndoManager = cmView.ViewPlugin.fromClass(YUndoManagerPluginValue)
 /**
  * @type {cmState.StateCommand}
  */
-export const undo = ({ state, dispatch }) =>
-  state.facet(yUndoManagerFacet).undo() || true
+export const undo = ({ state, dispatch }) => {
+  if (state.facet(yUndoManagerFacet).undo()) {
+    dispatch(
+      state.update({
+        effects: [cmView.EditorView.scrollIntoView(state.selection.main)]
+      }))
+  }
+  return true
+}
 
 /**
  * @type {cmState.StateCommand}
  */
-export const redo = ({ state, dispatch }) =>
-  state.facet(yUndoManagerFacet).redo() || true
+export const redo = ({ state, dispatch }) => {
+  if (state.facet(yUndoManagerFacet).redo()) {
+    dispatch(
+      state.update({
+        effects: [cmView.EditorView.scrollIntoView(state.selection.main)]
+      }))
+  }
+  return true
+}
 
 /**
  * @param {cmState.EditorState} state
