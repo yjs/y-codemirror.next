@@ -85,7 +85,10 @@ class YUndoManagerPluginValue {
       const sel = stackItem.meta.get(this)
       if (sel) {
         const selection = this.syncConf.fromYRange(sel)
-        view.dispatch(view.state.update({ selection }))
+        view.dispatch(view.state.update({
+          selection,
+          effects: [cmView.EditorView.scrollIntoView(selection)]
+        }))
         this._storeSelection()
       }
     }
@@ -122,28 +125,14 @@ export const yUndoManager = cmView.ViewPlugin.fromClass(YUndoManagerPluginValue)
 /**
  * @type {cmState.StateCommand}
  */
-export const undo = ({ state, dispatch }) => {
-  if (state.facet(yUndoManagerFacet).undo()) {
-    dispatch(
-      state.update({
-        effects: [cmView.EditorView.scrollIntoView(state.selection.main)]
-      }))
-  }
-  return true
-}
+export const undo = ({ state, dispatch }) =>
+  state.facet(yUndoManagerFacet).undo() || true
 
 /**
  * @type {cmState.StateCommand}
  */
-export const redo = ({ state, dispatch }) => {
-  if (state.facet(yUndoManagerFacet).redo()) {
-    dispatch(
-      state.update({
-        effects: [cmView.EditorView.scrollIntoView(state.selection.main)]
-      }))
-  }
-  return true
-}
+export const redo = ({ state, dispatch }) =>
+  state.facet(yUndoManagerFacet).redo() || true
 
 /**
  * @param {cmState.EditorState} state
