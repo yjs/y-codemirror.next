@@ -85,7 +85,10 @@ class YUndoManagerPluginValue {
       const sel = stackItem.meta.get(this)
       if (sel) {
         const selection = this.syncConf.fromYRange(sel)
-        view.dispatch(view.state.update({ selection }))
+        view.dispatch(view.state.update({
+          selection,
+          effects: [cmView.EditorView.scrollIntoView(selection)]
+        }))
         this._storeSelection()
       }
     }
