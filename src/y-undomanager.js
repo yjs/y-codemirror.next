@@ -4,7 +4,6 @@ import * as cmState from '@codemirror/state'
 import * as cmView from '@codemirror/view'
 import { ySyncFacet, ySyncAnnotation } from './y-sync.js'
 import { YRange } from './y-range.js' // eslint-disable-line
-import { createMutex } from 'lib0/mutex'
 
 export class YUndoManagerConfig {
   /**
@@ -73,8 +72,6 @@ class YUndoManagerPluginValue {
      * @type {null | YRange}
      */
     this._beforeChangeSelection = null
-    this._mux = createMutex()
-
     this._onStackItemAdded = ({ stackItem, changedParentTypes }) => {
       // only store metadata if this type was affected
       if (changedParentTypes.has(this.syncConf.ytext) && this._beforeChangeSelection && !stackItem.meta.has(this)) { // do not overwrite previous stored selection
@@ -92,9 +89,6 @@ class YUndoManagerPluginValue {
         this._storeSelection()
       }
     }
-    /**
-     * Do this without mutex, simply use the sync annotation
-     */
     this._storeSelection = () => {
       // store the selection before the change is applied so we can restore it with the undo manager.
       this._beforeChangeSelection = this.syncConf.toYRange(this.view.state.selection.main)
