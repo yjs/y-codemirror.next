@@ -1,4 +1,3 @@
-
 import * as t from 'lib0/testing'
 import * as prng from 'lib0/prng'
 import * as math from 'lib0/math'
@@ -6,9 +5,8 @@ import * as Y from 'yjs' // eslint-disable-line
 import { EditorView, basicSetup } from 'codemirror'
 import { EditorState } from '@codemirror/state'
 
-import { applyRandomTests } from 'yjs/tests/testHelper.js'
+import { applyRandomTests } from 'yjs/testHelper'
 
-// @ts-ignore
 import { yCollab } from 'y-codemirror.next'
 
 /**
@@ -33,13 +31,13 @@ let charCounter = 0
  */
 const trChange = [
   /**
-   * @param {Y.Doc} y
+   * @param {Y.Doc} _y
    * @param {prng.PRNG} gen
    * @param {EditorView} cm
    */
-  (y, gen, cm) => { // insert text
+  (_y, gen, cm) => { // insert text
     const from = prng.int32(gen, 0, cm.state.doc.length)
-    const insert = charCounter++ + prng.utf16String(gen, 6)
+    const insert = charCounter++ + prng.word(gen, 1, 6)
     return {
       from,
       to: from,
@@ -47,11 +45,11 @@ const trChange = [
     }
   },
   /**
-   * @param {Y.Doc} y
+   * @param {Y.Doc} _y
    * @param {prng.PRNG} gen
    * @param {EditorView} cm
    */
-  (y, gen, cm) => { // delete text
+  (_y, gen, cm) => { // delete text
     const from = prng.int32(gen, 0, cm.state.doc.length)
     const to = from + prng.int32(gen, 0, cm.state.doc.length - from)
     const insert = ''
@@ -62,11 +60,11 @@ const trChange = [
     }
   },
   /**
-   * @param {Y.Doc} y
+   * @param {Y.Doc} _y
    * @param {prng.PRNG} gen
    * @param {EditorView} cm
    */
-  (y, gen, cm) => { // replace text
+  (_y, gen, cm) => { // replace text
     const from = prng.int32(gen, 0, cm.state.doc.length)
     const to = from + math.min(prng.int32(gen, 0, cm.state.doc.length - from), 3)
     const insert = charCounter++ + prng.word(gen)
@@ -77,11 +75,11 @@ const trChange = [
     }
   },
   /**
-   * @param {Y.Doc} y
+   * @param {Y.Doc} _y
    * @param {prng.PRNG} gen
    * @param {EditorView} cm
    */
-  (y, gen, cm) => { // insert paragraph
+  (_y, gen, cm) => { // insert paragraph
     const from = prng.int32(gen, 0, cm.state.doc.length)
     const to = from + math.min(prng.int32(gen, 0, cm.state.doc.length - from), 3)
     const insert = '\n'
@@ -119,6 +117,13 @@ const checkResult = result => {
     t.compare(p1, p2)
   }
   charCounter = 0
+}
+
+/**
+ * @param {t.TestCase} tc
+ */
+export const testRepeatGenerateProsemirrorChanges1 = tc => {
+  checkResult(applyRandomTests(tc, cmChanges, 1, createNewCodemirror))
 }
 
 /**

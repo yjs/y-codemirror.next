@@ -1,4 +1,3 @@
-
 import * as cmView from '@codemirror/view'
 
 import * as cmState from '@codemirror/state'
@@ -100,10 +99,16 @@ class YRemoteCaretWidget extends cmView.WidgetType {
     ]))
   }
 
+  /**
+   * @param {any} widget
+   */
   eq (widget) {
     return widget.color === this.color
   }
 
+  /**
+   * @param {any} widget
+   */
   compare (widget) {
     return widget.color === this.color
   }
@@ -125,14 +130,13 @@ export class YRemoteSelectionsPluginValue {
    */
   constructor (view) {
     this.conf = view.state.facet(ySyncFacet)
-    this._listener = ({ added, updated, removed }, s, t) => {
+    this._awareness = this.conf.awareness
+    this._listener = this._awareness.on('change', ({ added, updated, removed }, s, t) => {
       const clients = added.concat(updated).concat(removed)
       if (clients.findIndex(id => id !== this.conf.awareness.doc.clientID) >= 0) {
         view.dispatch({ annotations: [yRemoteSelectionsAnnotation.of([])] })
       }
-    }
-    this._awareness = this.conf.awareness
-    this._awareness.on('change', this._listener)
+    })
     /**
      * @type {cmView.DecorationSet}
      */

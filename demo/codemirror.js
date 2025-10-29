@@ -1,16 +1,16 @@
 /* eslint-env browser */
-
 import * as Y from 'yjs'
 // @ts-ignore
 import { yCollab, yUndoManagerKeymap } from 'y-codemirror.next'
-import { WebrtcProvider } from 'y-webrtc'
+import { WebsocketProvider } from '@y/websocket'
 
 import { EditorView, basicSetup } from 'codemirror'
 import { keymap } from '@codemirror/view'
-import { javascript } from '@codemirror/lang-javascript'
+import { markdown } from '@codemirror/lang-markdown'
 // import { oneDark } from '@codemirror/next/theme-one-dark'
 
 import * as random from 'lib0/random'
+import * as error from 'lib0/error'
 import { EditorState } from '@codemirror/state'
 
 export const usercolors = [
@@ -26,32 +26,109 @@ export const usercolors = [
 
 export const userColor = usercolors[random.uint32() % usercolors.length]
 
-const ydoc = new Y.Doc()
-// const provider = new WebrtcProvider('codemirror6-demo-room', ydoc)
-const provider = new WebrtcProvider('codemirror6-demo-room-2', ydoc)
-const ytext = ydoc.getText('codemirror')
+const roomName = 'codemirror-suggestion-demo-3'
 
-provider.awareness.setLocalStateField('user', {
+/*
+ * # Logic for toggling connection & suggestion mode
+ */
+
+/**
+ * @type {HTMLInputElement?}
+ */
+const elemToggleConnect = document.querySelector('#toggle-connect')
+
+/**
+ * @type {HTMLInputElement?}
+ */
+const elemToggleShowSuggestions = document.querySelector('#toggle-show-suggestions')
+/**
+ * @type {HTMLInputElement?}
+ */
+const elemToggleSuggestMode = document.querySelector('#toggle-suggest-mode')
+if (elemToggleShowSuggestions == null || elemToggleSuggestMode == null || elemToggleConnect == null) error.unexpectedCase()
+
+if (localStorage.getItem('should-connect') != null) {
+  elemToggleConnect.checked = localStorage.getItem('should-connect') === 'true'
+}
+
+elemToggleShowSuggestions.addEventListener('change', () => initEditorBinding())
+
+// when in suggestion-mode, we should use a different clientId to reduce some overhead. This is not
+// strictly necessary.
+let otherClientID = random.uint53()
+elemToggleSuggestMode.addEventListener('change', () => {
+  const enabled = elemToggleSuggestMode.checked
+  attributionManager.suggestionMode = enabled
+  if (enabled) {
+    elemToggleShowSuggestions.checked = true
+    elemToggleShowSuggestions.disabled = true
+  } else {
+    elemToggleShowSuggestions.disabled = false
+  }
+  const nextClientId = otherClientID
+  otherClientID = suggestionDoc.clientID
+  suggestionDoc.clientID = nextClientId
+  initEditorBinding()
+})
+
+elemToggleConnect.addEventListener('change', () => {
+  if (elemToggleConnect.checked) {
+    providerYdoc.connectBc()
+    providerYdocSuggestions.connectBc()
+  } else {
+    providerYdoc.disconnectBc()
+    providerYdocSuggestions.disconnectBc()
+  }
+  localStorage.setItem('should-connect', elemToggleConnect.checked ? 'true' : 'false')
+})
+
+/*
+ * # Init two Yjs documents.
+ *
+ * The suggestion document is a fork of the original document. By keeping them separate, we can
+ * enforce different permissions on these documents.
+ */
+
+const ydoc = new Y.Doc()
+const providerYdoc = new WebsocketProvider('wss://demos.yjs.dev/ws', roomName, ydoc, { connect: false })
+elemToggleConnect.checked && providerYdoc.connectBc()
+const suggestionDoc = new Y.Doc({ isSuggestionDoc: true })
+const providerYdocSuggestions = new WebsocketProvider('wss://demos.yjs.dev/ws', roomName + '--suggestions', suggestionDoc, { connect: false })
+elemToggleConnect.checked && providerYdocSuggestions.connectBc()
+const attributionManager = Y.createAttributionManagerFromDiff(ydoc, suggestionDoc)
+
+providerYdoc.awareness.setLocalStateField('user', {
   name: 'Anonymous ' + Math.floor(Math.random() * 100),
   color: userColor.color,
   colorLight: userColor.light
 })
 
-const state = EditorState.create({
-  doc: ytext.toString(),
-  extensions: [
-    keymap.of([
-      ...yUndoManagerKeymap
-    ]),
-    basicSetup,
-    javascript(),
-    EditorView.lineWrapping,
-    yCollab(ytext, provider.awareness)
-    // oneDark
-  ]
-})
-
-const view = new EditorView({ state, parent: /** @type {HTMLElement} */ (document.querySelector('#editor')) })
-
-// @ts-ignore
-window.example = { provider, ydoc, ytext, view }
+/**
+ * @type {EditorView?}
+ */
+let currentView = null
+const initEditorBinding = () => {
+  const withSuggestions = elemToggleShowSuggestions.checked
+  /**
+   * @type {Y.Text<never>}
+   */
+  const ytext = /** @type {any} */ ((withSuggestions ? suggestionDoc : ydoc).getText('quill'))
+  const state = EditorState.create({
+    doc: ytext.toString(),
+    extensions: [
+      keymap.of([
+        ...yUndoManagerKeymap
+      ]),
+      basicSetup,
+      // markdown(),
+      EditorView.lineWrapping,
+      yCollab(ytext, providerYdoc.awareness, { attributionManager })
+      // oneDark
+    ]
+  })
+  currentView?.destroy()
+  currentView = new EditorView({ state, parent: /** @type {HTMLElement} */ (document.querySelector('#editor')) })
+  // @ts-ignore
+  window.example = { provider: providerYdoc, ydoc: ytext.doc, ytext, view: currentView }
+}
+initEditorBinding()

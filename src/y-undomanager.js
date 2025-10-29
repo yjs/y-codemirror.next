@@ -72,13 +72,17 @@ class YUndoManagerPluginValue {
      * @type {null | YRange}
      */
     this._beforeChangeSelection = null
-    this._onStackItemAdded = ({ stackItem, changedParentTypes }) => {
+    this._storeSelection = () => {
+      // store the selection before the change is applied so we can restore it with the undo manager.
+      this._beforeChangeSelection = this.syncConf.toYRange(this.view.state.selection.main)
+    }
+    this._onStackItemAdded = this._undoManager.on('stack-item-added', ({ stackItem, changedParentTypes }) => {
       // only store metadata if this type was affected
       if (changedParentTypes.has(this.syncConf.ytext) && this._beforeChangeSelection && !stackItem.meta.has(this)) { // do not overwrite previous stored selection
         stackItem.meta.set(this, this._beforeChangeSelection)
       }
-    }
-    this._onStackItemPopped = ({ stackItem }) => {
+    })
+    this._onStackItemPopped = this._undoManager.on('stack-item-popped', ({ stackItem }) => {
       const sel = stackItem.meta.get(this)
       if (sel) {
         const selection = this.syncConf.fromYRange(sel)
@@ -88,13 +92,7 @@ class YUndoManagerPluginValue {
         }))
         this._storeSelection()
       }
-    }
-    this._storeSelection = () => {
-      // store the selection before the change is applied so we can restore it with the undo manager.
-      this._beforeChangeSelection = this.syncConf.toYRange(this.view.state.selection.main)
-    }
-    this._undoManager.on('stack-item-added', this._onStackItemAdded)
-    this._undoManager.on('stack-item-popped', this._onStackItemPopped)
+    })
     this._undoManager.addTrackedOrigin(this.syncConf)
   }
 

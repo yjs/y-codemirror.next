@@ -1,6 +1,5 @@
 import nodeResolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
-import { terser } from 'rollup-plugin-terser'
 
 /*
 const customModules = new Set([
@@ -44,40 +43,14 @@ const debugResolve = {
   }
 }
 
-const minificationPlugins = process.env.PRODUCTION != null
-  ? [
-    terser({
-      module: true,
-      compress: {
-        hoist_vars: true,
-        module: true,
-        passes: 1,
-        pure_getters: true,
-        unsafe_comps: true,
-        unsafe_undefined: true
-      },
-      mangle: {
-        toplevel: true
-      }
-    })
-  ] : []
-
 export default [{
   input: './src/index.js',
-  external: id => /^(lib0|yjs|y-protocols|simple-peer)/.test(id),
+  external: id => /^(lib0|yjs|\@y\/protocols|simple-peer)/.test(id),
   output: [{
     name: 'y-codemirror',
     file: 'dist/y-codemirror.cjs',
     format: 'cjs',
-    sourcemap: true,
-    paths: path => {
-      if (/^lib0\//.test(path)) {
-        return `lib0/dist${path.slice(4)}.cjs`
-      } else if (/^y-protocols\//.test(path)) {
-        return `y-protocols/dist${path.slice(11)}.cjs`
-      }
-      return path
-    }
+    sourcemap: true
   }]
 }, {
   input: './demo/codemirror.js',
@@ -93,7 +66,6 @@ export default [{
       mainFields: ['module', 'browser', 'main']
     }),
     commonjs(),
-    ...minificationPlugins
   ]
 }, {
   input: './test/index.js',
@@ -116,12 +88,7 @@ export default [{
     name: 'test',
     file: 'dist/test.cjs',
     format: 'cjs',
-    sourcemap: true,
-    paths: path => {
-      if (/^lib0\//.test(path)) {
-        return `lib0/dist${path.slice(4)}.cjs`
-      }
-    }
+    sourcemap: true
   },
   plugins: [
     debugResolve,
