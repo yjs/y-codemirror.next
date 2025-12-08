@@ -7,18 +7,54 @@ import { YRange } from './y-range.js'
 export const yAttributionAnnotation = cmState.Annotation.define()
 
 export const yAttributionDecorations = cmState.StateField.define({
-  create() {
-    return cmView.Decoration.none
+  create (state) {
+    const conf = state.facet(ySyncFacet)
+    const ytext = conf.ytext
+    const delta = ytext.getContent(conf.am, { retainInserts: true, retainDeletes: true })
+    const { decorations } = ydeltaToCmChanges(delta, false)
+    return cmView.Decoration.set(decorations)
   },
-  update(decorations, tr) {
+  update (decorations, tr) {
+    /**
+     * @type {Array<cmState.Range<cmView.Decoration>>}
+     */
+    const splitDecorations = []
+    // Identify decorations that need to be split
+    tr.changes.iterChanges((fromA, toA, fromB, toB) => {
+      const insertedLength = toB - fromB
+      const deletedLength = toA - fromA
+
+      if (insertedLength > 0 && deletedLength === 0) {
+        const insertPos = fromA
+
+        decorations.between(insertPos, insertPos, (from, to, value) => {
+          if (from < insertPos && insertPos < to) {
+            const newInsertPos = fromB
+            splitDecorations.push(value.range(from, newInsertPos))
+            splitDecorations.push(value.range(newInsertPos + insertedLength, to + insertedLength))
+
+            // Remove the original decoration that spans this range
+            decorations = decorations.update({
+              filterFrom: from,
+              filterTo: to,
+              filter: (f, t) => !(f === from && t === to)
+            })
+          }
+        })
+      }
+    })
+    // Map remaining decorations
     decorations = decorations.map(tr.changes)
+    // Add split decorations
+    if (splitDecorations.length > 0) {
+      decorations = decorations.update({ add: splitDecorations })
+    }
     /**
      * @type {Array<cmState.Range<cmView.Decoration>>}
      */
     const newDecorations = tr.annotation(yAttributionAnnotation)
     if ((newDecorations?.length || 0) > 0) {
       decorations = decorations.update({ add: newDecorations })
-      debugger
     }
     return decorations
   },
@@ -34,8 +70,9 @@ const createAttributionDecoration = (type, username) => {
     class: `yjs-attribution-${type}`,
     attributes: {
       'data-user': username,
-      'title': `Edited by ${username}`
-    }
+      title: `Edited by ${username}`
+    },
+    inclusive: false
   })
 }
 
@@ -134,6 +171,53 @@ export const ySyncFacet = cmState.Facet.define({
 })
 
 /**
+ * @param {delta.DeltaAny} delta
+ * @param {boolean} skipDeletes
+ */
+const ydeltaToCmChanges = (delta, skipDeletes) => {
+  /**
+   * @type {cmState.Range<cmView.Decoration>[]}
+   */
+  const decorations = []
+  /**
+   * @type {Array<any>}
+   */
+  const changes = []
+  let pos = 0
+  for (const op of delta.children) {
+    if (op.type === 'insert' || op.type === 'retain') {
+      const attribution = op.attribution
+      if (attribution) {
+        if (attribution.insert) {
+          decorations.push(
+            createAttributionDecoration('insert', attribution.insert[0] || 'Anon').range(
+              pos,
+              pos + op.length
+            )
+          )
+        } else if (attribution.delete) {
+          decorations.push(
+            createAttributionDecoration('delete', attribution.delete[0] || 'Anon').range(
+              pos,
+              pos + op.length
+            )
+          )
+        }
+      }
+    }
+    if (op.type === 'insert') {
+      changes.push({ from: pos, to: pos, insert: /** @type {string} */ (op.insert) })
+    } else if (op.type === 'delete' && !skipDeletes) {
+      changes.push({ from: pos, to: pos + op.delete, insert: '' })
+      pos += op.delete
+    } else if (op.type === 'retain') {
+      pos += op.retain
+    }
+  }
+  return { changes, decorations }
+}
+
+/**
  * @type {cmState.AnnotationType<YSyncConfig>}
  */
 export const ySyncAnnotation = cmState.Annotation.define()
@@ -149,52 +233,6 @@ class YSyncPluginValue {
     this.view = view
     this.conf = view.state.facet(ySyncFacet)
     this._ytext = this.conf.ytext
-    /**
-     * @param {delta.DeltaAny} delta
-     * @param {boolean} skipDeletes
-     */
-    const ydeltaToCmChanges = (delta, skipDeletes) => {
-      /**
-       * @type {cmState.Range<cmView.Decoration>[]}
-       */
-      const decorations = []
-      /**
-       * @type {Array<any>}
-       */
-      const changes = []
-      let pos = 0
-      for (const op of delta.children) {
-        if (op.type === 'insert' || op.type === 'retain') {
-          const attribution = op.attribution
-          if (attribution) {
-            if (attribution.insert) {
-              decorations.push(
-                createAttributionDecoration('insert', attribution.insert[0] || 'Anon').range(
-                  pos,
-                  pos + op.length 
-                )
-              )
-            } else if (attribution.delete) {
-              decorations.push(
-                createAttributionDecoration('delete', attribution.delete[0] || 'Anon').range(
-                  pos,
-                  pos + op.length 
-                )
-              )
-            }
-          }
-        }
-        if (op.type === 'insert') {
-          changes.push({ from: pos, to: pos, insert: /** @type {string} */ (op.insert) })
-        } else if (op.type === 'delete' && !skipDeletes) {
-          changes.push({ from: pos, to: pos + op.delete, insert: '' })
-          pos += op.delete
-        } else if (op.type === 'retain') {
-          pos += op.retain
-        }
-      }
-      return { changes, decorations }
-    }
     this._observer = this._ytext.observe((event, tr) => {
       /**
        * @type {delta.DeltaAny?}
@@ -207,7 +245,7 @@ class YSyncPluginValue {
         delta = event.getDelta(this.conf.am)
       }
       if (delta != null) {
-        const {changes, decorations} = ydeltaToCmChanges(delta, tr.origin === this.conf)
+        const { changes, decorations } = ydeltaToCmChanges(delta, tr.origin === this.conf)
         // @todo find the proper way to do this
         const dispatch = () => view.dispatch({ changes, annotations: [ySyncAnnotation.of(this.conf), yAttributionAnnotation.of(decorations)] })
         if (tr.origin === this.conf) { setTimeout(dispatch, 0) } else { dispatch() }
@@ -218,7 +256,6 @@ class YSyncPluginValue {
       if (!delta.isEmpty()) {
         const { changes, decorations } = ydeltaToCmChanges(delta, false)
         if (changes.length > 0 && decorations.length > 0) {
-          debugger
           const dispatch = () => view.dispatch({ changes, annotations: [ySyncAnnotation.of(this.conf), yAttributionAnnotation.of(decorations)] })
           setTimeout(dispatch, 0)
         }
@@ -234,7 +271,7 @@ class YSyncPluginValue {
       return
     }
     const ytext = this.conf.ytext
-    ;/** @type {Y.Doc} */ (ytext.doc).transact(() => {
+    ;/** @type {Y.Doc} */ (ytext.doc).transact(tr => {
       /**
        * This variable adjusts the fromA position to the current position in the Y.Text type.
        */
@@ -251,6 +288,13 @@ class YSyncPluginValue {
         adj += insertText.length - (toA - fromA)
       })
       ytext.applyDelta(d, this.conf.am)
+      const attributedDeletes = tr.meta.get('attributedDeletes')
+      if (attributedDeletes != null) {
+        const updateFix = this._ytext.getContent(this.conf.am, { itemsToRender: attributedDeletes })
+        const { changes, decorations } = ydeltaToCmChanges(updateFix, false)
+        const dispatch = () => this.view.dispatch({ changes, annotations: [ySyncAnnotation.of(this.conf), yAttributionAnnotation.of(decorations)] })
+        setTimeout(dispatch, 0)
+      }
     }, this.conf)
   }
 

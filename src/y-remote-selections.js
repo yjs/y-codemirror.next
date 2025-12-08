@@ -131,7 +131,7 @@ export class YRemoteSelectionsPluginValue {
   constructor (view) {
     this.conf = view.state.facet(ySyncFacet)
     this._awareness = this.conf.awareness
-    this._listener = this._awareness.on('change', ({ added, updated, removed }, s, t) => {
+    this._listener = this._awareness.on('change', ({ added, updated, removed }) => {
       const clients = added.concat(updated).concat(removed)
       if (clients.findIndex(id => id !== this.conf.awareness.doc.clientID) >= 0) {
         view.dispatch({ annotations: [yRemoteSelectionsAnnotation.of([])] })

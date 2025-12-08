@@ -6,11 +6,13 @@ import { WebsocketProvider } from '@y/websocket'
 
 import { EditorView, basicSetup } from 'codemirror'
 import { keymap } from '@codemirror/view'
-import { markdown } from '@codemirror/lang-markdown'
+// import { markdown } from '@codemirror/lang-markdown'
 // import { oneDark } from '@codemirror/next/theme-one-dark'
 
+import * as delta from 'lib0/delta'
 import * as random from 'lib0/random'
 import * as error from 'lib0/error'
+import * as s from 'lib0/schema'
 import { EditorState } from '@codemirror/state'
 
 export const usercolors = [
@@ -26,7 +28,7 @@ export const usercolors = [
 
 export const userColor = usercolors[random.uint32() % usercolors.length]
 
-const roomName = 'codemirror-suggestion-demo-3'
+const roomName = 'codemirror-suggestion-demo-4'
 
 /*
  * # Logic for toggling connection & suggestion mode
@@ -113,8 +115,9 @@ const initEditorBinding = () => {
    * @type {Y.Text<never>}
    */
   const ytext = /** @type {any} */ ((withSuggestions ? suggestionDoc : ydoc).getText('quill'))
+  const docContent = ytext.getContent(attributionManager).children.map(s.match().if(delta.TextOp, op => op.insert).else(() => '').done()).join('')
   const state = EditorState.create({
-    doc: ytext.toString(),
+    doc: docContent,
     extensions: [
       keymap.of([
         ...yUndoManagerKeymap
@@ -129,6 +132,6 @@ const initEditorBinding = () => {
   currentView?.destroy()
   currentView = new EditorView({ state, parent: /** @type {HTMLElement} */ (document.querySelector('#editor')) })
   // @ts-ignore
-  window.example = { provider: providerYdoc, ydoc: ytext.doc, ytext, view: currentView }
+  window.example = { provider: providerYdoc, ydoc: ytext.doc, ytext, view: currentView, am: attributionManager }
 }
 initEditorBinding()

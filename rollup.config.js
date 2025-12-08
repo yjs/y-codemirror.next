@@ -45,7 +45,7 @@ const debugResolve = {
 
 export default [{
   input: './src/index.js',
-  external: id => /^(lib0|yjs|\@y\/protocols|simple-peer)/.test(id),
+  external: id => /^(lib0|yjs|@y\/protocols|simple-peer)/.test(id),
   output: [{
     name: 'y-codemirror',
     file: 'dist/y-codemirror.cjs',
@@ -65,7 +65,7 @@ export default [{
     nodeResolve({
       mainFields: ['module', 'browser', 'main']
     }),
-    commonjs(),
+    commonjs()
   ]
 }, {
   input: './test/index.js',
