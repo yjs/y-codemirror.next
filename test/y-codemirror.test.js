@@ -7,7 +7,7 @@ import { EditorState } from '@codemirror/state'
 
 import { applyRandomTests } from 'yjs/testHelper'
 
-import { yCollab } from 'y-codemirror.next'
+import { yCollab } from '@y/codemirror'
 
 /**
  * @param {any} ydoc
