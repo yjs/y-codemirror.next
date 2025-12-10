@@ -1,5 +1,5 @@
 /* eslint-env browser */
-import * as Y from 'yjs'
+import * as Y from '@y/y'
 // @ts-ignore
 import { yCollab, yUndoManagerKeymap } from 'y-codemirror.next'
 import { WebsocketProvider } from '@y/websocket'

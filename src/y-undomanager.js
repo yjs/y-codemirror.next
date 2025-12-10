@@ -1,4 +1,4 @@
-import * as Y from 'yjs' // eslint-disable-line
+import * as Y from '@y/y' // eslint-disable-line
 import * as cmState from '@codemirror/state'
 
 import * as cmView from '@codemirror/view'

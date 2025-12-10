@@ -5,7 +5,7 @@ import * as dom from 'lib0/dom'
 import * as pair from 'lib0/pair'
 import * as math from 'lib0/math'
 
-import * as Y from 'yjs'
+import * as Y from '@y/y'
 import { ySyncFacet } from './y-sync.js'
 
 export const yRemoteSelectionsTheme = cmView.EditorView.baseTheme({

@@ -17,7 +17,7 @@ This binding binds a [Y.Text](https://docs.yjs.dev/api/shared-types/y.text) to a
 ```js
 /* eslint-env browser */
 
-import * as Y from 'yjs'
+import * as Y from '@y/y'
 // @ts-ignore
 import { yCollab } from 'y-codemirror.next'
 import { WebrtcProvider } from 'y-webrtc'

@@ -25,11 +25,11 @@ const debugResolve = {
     if (importee === 'y-codemirror.next') {
       return `${process.cwd()}/src/index.js`
     }
-    if (importee === 'yjs/tests/testHelper.js') {
-      return `${process.cwd()}/node_modules/yjs/tests/testHelper.js`
+    if (importee === '@y/y/tests/testHelper.js') {
+      return `${process.cwd()}/node_modules/@y/y/tests/testHelper.js`
     }
-    if (importee === 'yjs') {
-      return `${process.cwd()}/node_modules/yjs/src/index.js`
+    if (importee === '@y/y') {
+      return `${process.cwd()}/node_modules/@y/y/src/index.js`
     }
     /*
     if (customModules.has(importee.split('/')[0])) {
@@ -45,7 +45,7 @@ const debugResolve = {
 
 export default [{
   input: './src/index.js',
-  external: id => /^(lib0|yjs|@y\/protocols|simple-peer)/.test(id),
+  external: id => /^(lib0|@y\/y|@y\/protocols|simple-peer)/.test(id),
   output: [{
     name: 'y-codemirror',
     file: 'dist/y-codemirror.cjs',

@@ -1,4 +1,4 @@
-import * as Y from 'yjs'
+import * as Y from '@y/y'
 
 /**
  * Defines a range on text using relative positions that can be transformed back to

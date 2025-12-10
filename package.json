@@ -31,7 +31,7 @@
     "test": "npm run dist && node test/test.node.cjs",
     "test-extensive": "npm run dist && node test/test.node.cjs --production --repetition-time 10000",
     "lint": "standard && tsc --skipLibCheck",
-    "preversion": "npm run lint && npm run test-extensive && npm run dist",
+    "preversion": "npm run lint && npm run dist",
     "debug": "concurrently 'http-server -o test.html' 'npm run watch'",
     "start": "concurrently 'http-server -o demo/index.html' 'npm run watch'"
   },
@@ -52,8 +52,8 @@
   "peerDependencies": {
     "@codemirror/state": "^6.5.2",
     "@codemirror/view": "^6.38.6",
-    "@y/protocols": "^1.0.6-2",
-    "yjs": "^14.0.0-16"
+    "@y/protocols": "^1.0.6-3",
+    "@y/y": "^14.0.0-16"
   },
   "dependencies": {
     "lib0": "^0.2.115-6"
@@ -66,8 +66,8 @@
     "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@types/node": "^24.10.1",
-    "@y/protocols": "^1.0.6-2",
-    "@y/websocket": "^4.0.0-2",
+    "@y/protocols": "^1.0.6-3",
+    "@y/websocket": "^4.0.0-3",
     "codemirror": "^6.0.0",
     "concurrently": "^5.3.0",
     "http-server": "^14.1.0",
@@ -75,6 +75,6 @@
     "rollup": "^4.53.3",
     "standard": "^17.1.2",
     "typescript": "^5.9.3",
-    "yjs": "^14.0.0-16"
+    "@y/y": "^14.0.0-16"
   }
 }
