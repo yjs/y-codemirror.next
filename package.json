@@ -56,7 +56,7 @@
     "@y/y": "^14.0.0-16"
   },
   "dependencies": {
-    "lib0": "^0.2.115-6"
+    "lib0": "^0.2.115"
   },
   "devDependencies": {
     "@codemirror/lang-javascript": "^6.2.4",
