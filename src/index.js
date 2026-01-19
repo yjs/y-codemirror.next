@@ -10,7 +10,7 @@ import { yUndoManager, yUndoManagerFacet, YUndoManagerConfig, undo, redo, yUndoM
 export { YRange, yRemoteSelections, yRemoteSelectionsTheme, ySync, ySyncFacet, YSyncConfig, ySyncAnnotation, yUndoManagerKeymap }
 
 /**
- * @param {Y.Text<never>} ytext
+ * @param {Y.Type<{text: true}>} ytext
  * @param {any} awareness
  * @param {Object} [opts]
  * @param {Y.UndoManager | false} [opts.undoManager] Set undoManager to false to disable the undo-redo plugin

@@ -10,15 +10,15 @@ import { applyRandomTests } from '@y/y/testHelper'
 import { yCollab } from '@y/codemirror'
 
 /**
- * @param {any} ydoc
+ * @param {Y.Doc} ydoc
  * @return {EditorView}
  */
 const createNewCodemirror = ydoc => {
   const state = EditorState.create({
-    doc: ydoc.getText().toString(),
+    doc: ydoc.get().toString(),
     extensions: [
       basicSetup,
-      yCollab(ydoc.getText(), null, { undoManager: false })
+      yCollab(ydoc.get(), null, { undoManager: false })
     ]
   })
   return new EditorView({ state })

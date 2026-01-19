@@ -111,11 +111,8 @@ providerYdoc.awareness.setLocalStateField('user', {
 let currentView = null
 const initEditorBinding = () => {
   const withSuggestions = elemToggleShowSuggestions.checked
-  /**
-   * @type {Y.Text<never>}
-   */
-  const ytext = /** @type {any} */ ((withSuggestions ? suggestionDoc : ydoc).getText('quill'))
-  const docContent = ytext.getContent(attributionManager).children.map(s.match().if(delta.TextOp, op => op.insert).else(() => '').done()).join('')
+  const ytext = (withSuggestions ? suggestionDoc : ydoc).get('quill')
+  const docContent = ytext.toDelta(attributionManager).children.map(s.match().if(delta.TextOp, op => op.insert).else(() => '').done()).join('')
   const state = EditorState.create({
     doc: docContent,
     extensions: [

@@ -10,7 +10,7 @@ export const yAttributionDecorations = cmState.StateField.define({
   create (state) {
     const conf = state.facet(ySyncFacet)
     const ytext = conf.ytext
-    const delta = ytext.getContent(conf.am, { retainInserts: true, retainDeletes: true })
+    const delta = ytext.toDelta(conf.am, { retainInserts: true, retainDeletes: true })
     const { decorations } = ydeltaToCmChanges(delta, false)
     return cmView.Decoration.set(decorations)
   },
@@ -78,13 +78,13 @@ const createAttributionDecoration = (type, username) => {
 
 export class YSyncConfig {
   /**
-   * @param {Y.Text<never>} ytext
+   * @param {Y.Type<{ text: true }>} ytext
    * @param {import('@y/protocols/awareness').Awareness} awareness
    * @param {Y.AbstractAttributionManager} am
    */
   constructor (ytext, awareness, am) {
     /**
-     * @type {Y.Text<never>}
+     * @type {Y.Type<{ text: true }>}
      */
     this.ytext = ytext
     this.awareness = awareness
@@ -235,12 +235,12 @@ class YSyncPluginValue {
     this._ytext = this.conf.ytext
     this._observer = this._ytext.observe((event, tr) => {
       /**
-       * @type {delta.DeltaAny?}
+       * @type {delta.Delta<{text: true}>?}
        */
       let delta = null
       if (tr.origin === this.conf && this.conf.am !== Y.noAttributionsManager) {
         const changes = Y.mergeIdSets([tr.insertSet, tr.deleteSet])
-        delta = this._ytext.getContent(this.conf.am, { itemsToRender: changes, retainInserts: true })
+        delta = this._ytext.toDelta(this.conf.am, { itemsToRender: changes, retainInserts: true })
       } else if (tr.origin !== this.conf) {
         delta = event.getDelta(this.conf.am)
       }
@@ -252,7 +252,7 @@ class YSyncPluginValue {
       }
     })
     this._onAttrChange = this.conf.am.on('change', (changes) => {
-      const delta = this._ytext.getContent(this.conf.am, { itemsToRender: changes, retainInserts: true, retainDeletes: true })
+      const delta = this._ytext.toDelta(this.conf.am, { itemsToRender: changes, retainInserts: true, retainDeletes: true })
       if (!delta.isEmpty()) {
         const { changes, decorations } = ydeltaToCmChanges(delta, false)
         if (changes.length > 0 && decorations.length > 0) {
@@ -276,7 +276,7 @@ class YSyncPluginValue {
        * This variable adjusts the fromA position to the current position in the Y.Text type.
        */
       let adj = 0
-      const d = delta.text()
+      const d = delta.create(delta.$delta({ text: true }))
       update.changes.iterChanges((fromA, toA, fromB, toB, insert) => {
         const insertText = insert.sliceString(0, insert.length, '\n')
         if (fromA !== toA) {
@@ -290,7 +290,7 @@ class YSyncPluginValue {
       ytext.applyDelta(d, this.conf.am)
       const attributedDeletes = tr.meta.get('attributedDeletes')
       if (attributedDeletes != null) {
-        const updateFix = this._ytext.getContent(this.conf.am, { itemsToRender: attributedDeletes })
+        const updateFix = this._ytext.toDelta(this.conf.am, { itemsToRender: attributedDeletes })
         const { changes, decorations } = ydeltaToCmChanges(updateFix, false)
         const dispatch = () => this.view.dispatch({ changes, annotations: [ySyncAnnotation.of(this.conf), yAttributionAnnotation.of(decorations)] })
         setTimeout(dispatch, 0)

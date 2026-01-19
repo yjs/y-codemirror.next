@@ -23,6 +23,7 @@ document.getSelection = () => ({ })
 global.requestAnimationFrame = f => setTimeout(f, 0)
 window.Element.prototype.scrollTo = () => {}
 global.scrollTo = () => {}
+window.requestAnimationFrame = setTimeout
 
 document.createRange = () => ({
   setStart () {},
