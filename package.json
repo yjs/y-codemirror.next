@@ -53,7 +53,7 @@
     "@codemirror/state": "^6.5.2",
     "@codemirror/view": "^6.38.6",
     "@y/protocols": "^1.0.6-3",
-    "@y/y": "^14.0.0-21"
+    "@y/y": "^14.0.0-22"
   },
   "dependencies": {
     "lib0": "^1.0.0-0"
@@ -74,7 +74,6 @@
     "jsdom": "^16.7.0",
     "rollup": "^4.53.3",
     "standard": "^17.1.2",
-    "typescript": "^5.9.3",
-    "@y/y": "^14.0.0-21"
+    "typescript": "^5.9.3"
   }
 }
