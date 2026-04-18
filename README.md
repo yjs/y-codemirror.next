@@ -5,12 +5,6 @@
 This binding binds a [Y.Text](https://docs.yjs.dev/api/shared-types/y.text) to a CodeMirror editor.
 This README documents the `y-codemirror.next` project.
 
-## Package notes
-
-- `@y/codemirror` (`npm i @y/codemirror`) is the package published from this repository (main branch). It implements collaborative editing for Yjs v14, which is currently in beta.
-- `y-codemirror.next` is a different package. If you use Yjs v13, continue using `y-codemirror.next`.
-- Use GitHub issues for bug reports and feature requests. For general questions, use https://discuss.yjs.dev/
-
 ## Features
 
 * Sync CodeMirror 6 editor
@@ -26,7 +20,7 @@ This README documents the `y-codemirror.next` project.
 
 import * as Y from '@y/y'
 // @ts-ignore
-import { yCollab } from '@y/codemirror'
+import { yCollab } from 'y-codemirror.next'
 import { WebrtcProvider } from 'y-webrtc'
 
 import { EditorView, basicSetup } from "codemirror";
