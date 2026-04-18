@@ -2,6 +2,11 @@
 
 > [CodeMirror 6](https://codemirror.net/) editor binding for [Yjs](https://github.com/yjs/yjs) - [Demo](https://demos.yjs.dev/codemirror.next/codemirror.next.html)
 
+> **Note:** The `main` branch of this repository is the development branch for
+> the unstable `@y/codemirror` release, which adds support for Yjs v14
+> (`@y/y`). Most users should continue to use the stable `y-codemirror.next`
+> package with Yjs v13 for now.
+
 This binding binds a [Y.Text](https://docs.yjs.dev/api/shared-types/y.text) to a CodeMirror editor.
 
 ## Features
