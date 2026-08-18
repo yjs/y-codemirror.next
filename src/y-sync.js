@@ -88,7 +88,6 @@ export class YSyncConfig {
      */
     this.ytext = ytext
     this.awareness = awareness
-    this.undoManager = new Y.UndoManager(ytext)
     this.am = am
   }
 
