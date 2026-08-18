@@ -1,6 +1,5 @@
 import nodeResolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
-import { terser } from 'rollup-plugin-terser'
 
 /*
 const customModules = new Set([
@@ -44,24 +43,6 @@ const debugResolve = {
   }
 }
 
-const minificationPlugins = process.env.PRODUCTION != null
-  ? [
-    terser({
-      module: true,
-      compress: {
-        hoist_vars: true,
-        module: true,
-        passes: 1,
-        pure_getters: true,
-        unsafe_comps: true,
-        unsafe_undefined: true
-      },
-      mangle: {
-        toplevel: true
-      }
-    })
-  ] : []
-
 export default [{
   input: './src/index.js',
   external: id => /^(lib0|yjs|y-protocols|simple-peer)/.test(id),
@@ -92,8 +73,7 @@ export default [{
     nodeResolve({
       mainFields: ['module', 'browser', 'main']
     }),
-    commonjs(),
-    ...minificationPlugins
+    commonjs()
   ]
 }, {
   input: './test/index.js',
