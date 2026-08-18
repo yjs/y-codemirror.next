@@ -1,4 +1,3 @@
-
 import * as cmView from '@codemirror/view'
 
 import * as cmState from '@codemirror/state'

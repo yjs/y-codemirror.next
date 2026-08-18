@@ -1,4 +1,3 @@
-
 import * as codemirror from './y-codemirror.test.js'
 
 import { runTests } from 'lib0/testing'

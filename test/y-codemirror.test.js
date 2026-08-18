@@ -1,4 +1,3 @@
-
 import * as t from 'lib0/testing'
 import * as prng from 'lib0/prng'
 import * as math from 'lib0/math'
