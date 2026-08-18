@@ -8,7 +8,6 @@ export class YSyncConfig {
   constructor (ytext, awareness) {
     this.ytext = ytext
     this.awareness = awareness
-    this.undoManager = new Y.UndoManager(ytext)
   }
 
   /**
