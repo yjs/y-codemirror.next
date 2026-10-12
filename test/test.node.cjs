@@ -24,6 +24,8 @@ global.requestAnimationFrame = f => setTimeout(f, 0)
 window.Element.prototype.scrollTo = () => {}
 global.scrollTo = () => {}
 window.requestAnimationFrame = setTimeout
+window.cancelAnimationFrame = clearTimeout
+global.cancelAnimationFrame = clearTimeout
 
 document.createRange = () => ({
   setStart () {},

@@ -11,10 +11,6 @@ import { ySyncFacet } from './y-sync.js'
 export const yRemoteSelectionsTheme = cmView.EditorView.baseTheme({
   '.cm-ySelection': {
   },
-  '.cm-yLineSelection': {
-    padding: 0,
-    margin: '0px 2px 0px 4px'
-  },
   '.cm-ySelectionCaret': {
     position: 'relative',
     borderLeft: '1px solid black',
@@ -72,6 +68,60 @@ export const yRemoteSelectionsTheme = cmView.EditorView.baseTheme({
  */
 const yRemoteSelectionsAnnotation = cmState.Annotation.define()
 
+/**
+ * The selection of a remote user, resolved to absolute positions in the editor document.
+ *
+ * @typedef {Object} RemoteSelection
+ * @property {number} anchor
+ * @property {number} head
+ * @property {string} name
+ * @property {string} color
+ * @property {string} colorLight
+ */
+
+/**
+ * Resolve the selections of all remote users to absolute positions in the editor document.
+ *
+ * @param {import('./y-sync.js').YSyncConfig} conf
+ * @param {number} docLength
+ * @return {Array<RemoteSelection>}
+ */
+const getRemoteSelections = (conf, docLength) => {
+  const ytext = conf.ytext
+  const ydoc = /** @type {Y.Doc} */ (ytext.doc)
+  const awareness = conf.awareness
+  /**
+   * @type {Array<RemoteSelection>}
+   */
+  const selections = []
+  awareness.getStates().forEach((state, clientid) => {
+    if (clientid === awareness.doc.clientID) {
+      return
+    }
+    const cursor = state.cursor
+    if (cursor == null || cursor.anchor == null || cursor.head == null) {
+      return
+    }
+    const anchor = Y.createAbsolutePositionFromRelativePosition(cursor.anchor, ydoc)
+    const head = Y.createAbsolutePositionFromRelativePosition(cursor.head, ydoc)
+    if (anchor == null || head == null || anchor.type !== ytext || head.type !== ytext) {
+      return
+    }
+    const { color = '#30bced', name = 'Anonymous' } = state.user || {}
+    const colorLight = (state.user && state.user.colorLight) || color + '33'
+    selections.push({
+      // Guard against positions outside of the editor document (e.g. when ytext and the editor are
+      // temporarily out of sync). Out-of-range positions would break the layout computation.
+      anchor: math.min(anchor.index, docLength),
+      head: math.min(head.index, docLength),
+      name,
+      color,
+      colorLight
+    })
+  })
+  return selections
+}
+
 class YRemoteCaretWidget extends cmView.WidgetType {
   /**
    * @param {string} color
@@ -124,6 +174,49 @@ class YRemoteCaretWidget extends cmView.WidgetType {
   }
 }
 
+/**
+ * A layer marker that draws one rectangle of a remote selection in the color of the remote user.
+ *
+ * @implements {cmView.LayerMarker}
+ */
+class YRemoteSelectionMarker {
+  /**
+   * @param {cmView.RectangleMarker} rect
+   * @param {string} color
+   */
+  constructor (rect, color) {
+    this.rect = rect
+    this.color = color
+  }
+
+  /**
+   * @param {cmView.LayerMarker} other
+   * @return {boolean}
+   */
+  eq (other) {
+    return other instanceof YRemoteSelectionMarker && other.color === this.color && this.rect.eq(other.rect)
+  }
+
+  draw () {
+    const elt = this.rect.draw()
+    elt.style.backgroundColor = this.color
+    return elt
+  }
+
+  /**
+   * @param {HTMLElement} elt
+   * @param {cmView.LayerMarker} prev
+   * @return {boolean}
+   */
+  update (elt, prev) {
+    if (!(prev instanceof YRemoteSelectionMarker) || !this.rect.update(elt, prev.rect)) {
+      return false
+    }
+    elt.style.backgroundColor = this.color
+    return true
+  }
+}
+
 export class YRemoteSelectionsPluginValue {
   /**
    * @param {cmView.EditorView} view
@@ -138,9 +231,17 @@ export class YRemoteSelectionsPluginValue {
       }
     })
     /**
+     * The remote selections that are currently rendered. The selection layer reads this to draw the
+     * selection backgrounds.
+     *
+     * @type {Array<RemoteSelection>}
+     */
+    this.remoteSelections = []
+    /**
      * @type {cmView.DecorationSet}
      */
     this.decorations = cmState.RangeSet.of([])
+    this._renderRemoteSelections(view.state)
   }
 
   destroy () {
@@ -148,16 +249,32 @@ export class YRemoteSelectionsPluginValue {
   }
 
   /**
+   * Compute the remote selections and the caret decorations for the given state.
+   *
+   * The selection backgrounds are not rendered as decorations because mark- and line-decorations
+   * affect the layout of the document. They are drawn by the selection layer instead.
+   *
+   * @param {cmState.EditorState} state
+   */
+  _renderRemoteSelections (state) {
+    this.remoteSelections = getRemoteSelections(this.conf, state.doc.length)
+    this.decorations = cmView.Decoration.set(this.remoteSelections.map(({ anchor, head, color, name }) => ({
+      from: head,
+      to: head,
+      value: cmView.Decoration.widget({
+        side: head - anchor > 0 ? -1 : 1, // the local cursor should be rendered outside the remote selection
+        block: false,
+        widget: new YRemoteCaretWidget(color, name)
+      })
+    })), true)
+  }
+
+  /**
    * @param {cmView.ViewUpdate} update
    */
   update (update) {
     const ytext = this.conf.ytext
-    const ydoc = /** @type {Y.Doc} */ (ytext.doc)
     const awareness = this.conf.awareness
-    /**
-     * @type {Array<cmState.Range<cmView.Decoration>>}
-     */
-    const decorations = []
     const localAwarenessState = this.conf.awareness.getLocalState()
 
     // set local awareness state (update cursors)
@@ -182,80 +299,39 @@ export class YRemoteSelectionsPluginValue {
     }
 
     // update decorations (remote selections)
-    awareness.getStates().forEach((state, clientid) => {
-      if (clientid === awareness.doc.clientID) {
-        return
-      }
-      const cursor = state.cursor
-      if (cursor == null || cursor.anchor == null || cursor.head == null) {
-        return
-      }
-      const anchor = Y.createAbsolutePositionFromRelativePosition(cursor.anchor, ydoc)
-      const head = Y.createAbsolutePositionFromRelativePosition(cursor.head, ydoc)
-      if (anchor == null || head == null || anchor.type !== ytext || head.type !== ytext) {
-        return
-      }
-      const { color = '#30bced', name = 'Anonymous' } = state.user || {}
-      const colorLight = (state.user && state.user.colorLight) || color + '33'
-      const start = math.min(anchor.index, head.index)
-      const end = math.max(anchor.index, head.index)
-      const startLine = update.view.state.doc.lineAt(start)
-      const endLine = update.view.state.doc.lineAt(end)
-      if (startLine.number === endLine.number) {
-        // selected content in a single line.
-        decorations.push({
-          from: start,
-          to: end,
-          value: cmView.Decoration.mark({
-            attributes: { style: `background-color: ${colorLight}` },
-            class: 'cm-ySelection'
-          })
-        })
-      } else {
-        // selected content in multiple lines
-        // first, render text-selection in the first line
-        decorations.push({
-          from: start,
-          to: startLine.from + startLine.length,
-          value: cmView.Decoration.mark({
-            attributes: { style: `background-color: ${colorLight}` },
-            class: 'cm-ySelection'
-          })
-        })
-        // render text-selection in the last line
-        decorations.push({
-          from: endLine.from,
-          to: end,
-          value: cmView.Decoration.mark({
-            attributes: { style: `background-color: ${colorLight}` },
-            class: 'cm-ySelection'
-          })
-        })
-        for (let i = startLine.number + 1; i < endLine.number; i++) {
-          const linePos = update.view.state.doc.line(i).from
-          decorations.push({
-            from: linePos,
-            to: linePos,
-            value: cmView.Decoration.line({
-              attributes: { style: `background-color: ${colorLight}`, class: 'cm-yLineSelection' }
-            })
-          })
-        }
-      }
-      decorations.push({
-        from: head.index,
-        to: head.index,
-        value: cmView.Decoration.widget({
-          side: head.index - anchor.index > 0 ? -1 : 1, // the local cursor should be rendered outside the remote selection
-          block: false,
-          widget: new YRemoteCaretWidget(color, name)
-        })
-      })
-    })
-    this.decorations = cmView.Decoration.set(decorations, true)
+    this._renderRemoteSelections(update.state)
   }
 }
 
+/**
+ * Draws the selection ranges of remote users in a layer behind the text - the same way CodeMirror's
+ * `drawSelection` extension draws the local selection. The layer is positioned absolutely, so it
+ * doesn't affect the layout of the document (no layout shifts), and the rectangles of partially and
+ * fully selected lines connect seamlessly.
+ *
+ * @param {cmView.ViewPlugin<YRemoteSelectionsPluginValue, any>} plugin
+ */
+const yRemoteSelectionsLayer = plugin => cmView.layer({
+  above: false,
+  class: 'cm-ySelectionLayer',
+  update: update => update.docChanged || update.viewportChanged || update.transactions.some(tr => tr.annotation(yRemoteSelectionsAnnotation) !== undefined),
+  markers: view => {
+    /**
+     * @type {Array<cmView.LayerMarker>}
+     */
+    const markers = []
+    view.plugin(plugin)?.remoteSelections.forEach(({ anchor, head, colorLight }) => {
+      if (anchor !== head) {
+        cmView.RectangleMarker.forRange(view, 'cm-ySelection', cmState.EditorSelection.range(anchor, head)).forEach(rect => {
+          markers.push(new YRemoteSelectionMarker(rect, colorLight))
+        })
+      }
+    })
+    return markers
+  }
+})
+
 export const yRemoteSelections = cmView.ViewPlugin.fromClass(YRemoteSelectionsPluginValue, {
-  decorations: v => v.decorations
+  decorations: v => v.decorations,
+  provide: yRemoteSelectionsLayer
 })
