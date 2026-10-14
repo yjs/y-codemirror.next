@@ -10,7 +10,7 @@ export const yAttributionDecorations = cmState.StateField.define({
   create (state) {
     const conf = state.facet(ySyncFacet)
     const ytext = conf.ytext
-    const delta = ytext.toDelta(conf.am, { retainInserts: true, retainDeletes: true })
+    const delta = ytext.toDelta({ renderer: conf.renderer, retainInserts: true, retainDeletes: true })
     const { decorations } = ydeltaToCmChanges(delta, false)
     return cmView.Decoration.set(decorations)
   },
@@ -78,17 +78,17 @@ const createAttributionDecoration = (type, username) => {
 
 export class YSyncConfig {
   /**
-   * @param {Y.Type<{ text: true }>} ytext
+   * @param {Y.Node<{ text: true }>} ytext
    * @param {import('@y/protocols/awareness').Awareness} awareness
-   * @param {Y.AbstractAttributionManager} am
+   * @param {Y.AbstractRenderer?} renderer Renders attributed content (e.g. suggestions). `null` renders the content as-is.
    */
-  constructor (ytext, awareness, am) {
+  constructor (ytext, awareness, renderer) {
     /**
-     * @type {Y.Type<{ text: true }>}
+     * @type {Y.Node<{ text: true }>}
      */
     this.ytext = ytext
     this.awareness = awareness
-    this.am = am
+    this.renderer = renderer
   }
 
   /**
@@ -232,16 +232,17 @@ class YSyncPluginValue {
     this.view = view
     this.conf = view.state.facet(ySyncFacet)
     this._ytext = this.conf.ytext
+    const renderer = this.conf.renderer
     this._observer = this._ytext.observe((event, tr) => {
       /**
        * @type {delta.Delta<{text: true}>?}
        */
       let delta = null
-      if (tr.origin === this.conf && this.conf.am !== Y.noAttributionsManager) {
+      if (tr.origin === this.conf && renderer != null) {
         const changes = Y.mergeIdSets([tr.insertSet, tr.deleteSet])
-        delta = this._ytext.toDelta(this.conf.am, { itemsToRender: changes, retainInserts: true })
+        delta = this._ytext.toDelta({ renderer, itemsToRender: changes, retainInserts: true })
       } else if (tr.origin !== this.conf) {
-        delta = event.getDelta(this.conf.am)
+        delta = event.getDelta({ renderer })
       }
       if (delta != null) {
         const { changes, decorations } = ydeltaToCmChanges(delta, tr.origin === this.conf)
@@ -250,16 +251,24 @@ class YSyncPluginValue {
         if (tr.origin === this.conf) { setTimeout(dispatch, 0) } else { dispatch() }
       }
     })
-    this._onAttrChange = this.conf.am.on('change', (changes) => {
-      const delta = this._ytext.toDelta(this.conf.am, { itemsToRender: changes, retainInserts: true, retainDeletes: true })
-      if (!delta.isEmpty()) {
-        const { changes, decorations } = ydeltaToCmChanges(delta, false)
-        if (changes.length > 0 && decorations.length > 0) {
-          const dispatch = () => view.dispatch({ changes, annotations: [ySyncAnnotation.of(this.conf), yAttributionAnnotation.of(decorations)] })
-          setTimeout(dispatch, 0)
+    /**
+     * Re-render content whose attributions changed (e.g. accepted / rejected suggestions).
+     *
+     * @type {((changes: Y.IdSet, origin: any, local: boolean) => void)?}
+     */
+    this._onRendererChange = null
+    if (renderer != null) {
+      this._onRendererChange = renderer.on('change', changes => {
+        const delta = this._ytext.toDelta({ renderer, itemsToRender: changes, retainInserts: true, retainDeletes: true })
+        if (!delta.isEmpty()) {
+          const { changes, decorations } = ydeltaToCmChanges(delta, false)
+          if (changes.length > 0 && decorations.length > 0) {
+            const dispatch = () => view.dispatch({ changes, annotations: [ySyncAnnotation.of(this.conf), yAttributionAnnotation.of(decorations)] })
+            setTimeout(dispatch, 0)
+          }
         }
-      }
-    })
+      })
+    }
   }
 
   /**
@@ -286,11 +295,18 @@ class YSyncPluginValue {
         }
         adj += insertText.length - (toA - fromA)
       })
-      ytext.applyDelta(d, this.conf.am)
+      const fix = ytext.applyDelta(d, this.conf, { renderer: this.conf.renderer })
       const attributedDeletes = tr.meta.get('attributedDeletes')
       if (attributedDeletes != null) {
-        const updateFix = this._ytext.toDelta(this.conf.am, { itemsToRender: attributedDeletes })
+        const updateFix = this._ytext.toDelta({ renderer: this.conf.renderer, itemsToRender: attributedDeletes })
         const { changes, decorations } = ydeltaToCmChanges(updateFix, false)
+        const dispatch = () => this.view.dispatch({ changes, annotations: [ySyncAnnotation.of(this.conf), yAttributionAnnotation.of(decorations)] })
+        setTimeout(dispatch, 0)
+      }
+      if (fix != null) {
+        // The change addressed content that is deleted but still rendered (e.g. a suggested deletion).
+        // Yjs reverted that part of the change, so revert it in the editor as well.
+        const { changes, decorations } = ydeltaToCmChanges(fix, false)
         const dispatch = () => this.view.dispatch({ changes, annotations: [ySyncAnnotation.of(this.conf), yAttributionAnnotation.of(decorations)] })
         setTimeout(dispatch, 0)
       }
@@ -299,6 +315,9 @@ class YSyncPluginValue {
 
   destroy () {
     this._ytext.unobserve(this._observer)
+    if (this._onRendererChange != null) {
+      this.conf.renderer?.off('change', this._onRendererChange)
+    }
   }
 }
 

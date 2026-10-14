@@ -60,7 +60,7 @@ elemToggleShowSuggestions.addEventListener('change', () => initEditorBinding())
 let otherClientID = random.uint53()
 elemToggleSuggestMode.addEventListener('change', () => {
   const enabled = elemToggleSuggestMode.checked
-  attributionManager.suggestionMode = enabled
+  renderer.suggestionMode = enabled
   if (enabled) {
     elemToggleShowSuggestions.checked = true
     elemToggleShowSuggestions.disabled = true
@@ -97,7 +97,7 @@ elemToggleConnect.checked && providerYdoc.connectBc()
 const suggestionDoc = new Y.Doc({ isSuggestionDoc: true })
 const providerYdocSuggestions = new WebsocketProvider('wss://demos.yjs.dev/ws', roomName + '--suggestions', suggestionDoc, { connect: false })
 elemToggleConnect.checked && providerYdocSuggestions.connectBc()
-const attributionManager = Y.createAttributionManagerFromDiff(ydoc, suggestionDoc)
+const renderer = Y.createDiffRenderer(ydoc, suggestionDoc)
 
 providerYdoc.awareness.setLocalStateField('user', {
   name: 'Anonymous ' + Math.floor(Math.random() * 100),
@@ -112,7 +112,7 @@ let currentView = null
 const initEditorBinding = () => {
   const withSuggestions = elemToggleShowSuggestions.checked
   const ytext = (withSuggestions ? suggestionDoc : ydoc).get('quill')
-  const docContent = ytext.toDelta(attributionManager).children.map(s.match().if(delta.TextOp, op => op.insert).else(() => '').done()).join('')
+  const docContent = ytext.toDelta({ renderer }).children.map(s.match().if(delta.TextOp, op => op.insert).else(() => '').done()).join('')
   const state = EditorState.create({
     doc: docContent,
     extensions: [
@@ -122,13 +122,13 @@ const initEditorBinding = () => {
       basicSetup,
       // markdown(),
       EditorView.lineWrapping,
-      yCollab(ytext, providerYdoc.awareness, { attributionManager })
+      yCollab(ytext, providerYdoc.awareness, { renderer })
       // oneDark
     ]
   })
   currentView?.destroy()
   currentView = new EditorView({ state, parent: /** @type {HTMLElement} */ (document.querySelector('#editor')) })
   // @ts-ignore
-  window.example = { provider: providerYdoc, ydoc: ytext.doc, ytext, view: currentView, am: attributionManager }
+  window.example = { provider: providerYdoc, ydoc: ytext.doc, ytext, view: currentView, renderer }
 }
 initEditorBinding()

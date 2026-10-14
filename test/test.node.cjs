@@ -15,7 +15,8 @@ const { window } = new jsdom.JSDOM(documentContent)
   'navigator',
   'Text',
   'HTMLElement',
-  'MutationObserver'
+  'MutationObserver',
+  'Window'
 ].forEach(name => {
   global[name] = window[name]
 })

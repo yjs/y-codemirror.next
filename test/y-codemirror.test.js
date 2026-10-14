@@ -8,6 +8,7 @@ import { EditorView, basicSetup } from 'codemirror'
 import { EditorState } from '@codemirror/state'
 import { Awareness, encodeAwarenessUpdate, applyAwarenessUpdate } from '@y/protocols/awareness'
 
+// @ts-expect-error @y/y 14.0.0-rc.28 doesn't ship the types of @y/y/testHelper (dist/tests/testHelper.d.ts is missing from the package)
 import { applyRandomTests } from '@y/y/testHelper'
 
 import { yCollab, yRemoteSelections } from '@y/codemirror'
@@ -30,7 +31,7 @@ const createNewCodemirror = ydoc => {
 let charCounter = 0
 
 /**
- * @type {Array<function(Y.Doc, prng.PRNG, EditorView):{from:number,to:number,insert:string}>}
+ * @type {Array<(y: Y.Doc, gen: prng.PRNG, cm: EditorView) => { from: number, to: number, insert: string }>}
  */
 const trChange = [
   /**

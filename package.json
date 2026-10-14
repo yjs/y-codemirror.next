@@ -50,30 +50,31 @@
   },
   "homepage": "https://github.com/yjs/y-codemirror.next#readme",
   "peerDependencies": {
-    "@codemirror/state": "^6.5.2",
-    "@codemirror/view": "^6.38.6",
-    "@y/protocols": "^1.0.6-3",
-    "@y/y": "^14.0.0-22"
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.14",
+    "@y/protocols": "^1.0.6-rc.1",
+    "@y/y": "^14.0.0-rc.28"
   },
   "dependencies": {
-    "lib0": "^1.0.0-0"
+    "lib0": "^1.0.0-rc.36"
   },
   "devDependencies": {
-    "@codemirror/lang-javascript": "^6.2.4",
-    "@codemirror/lang-markdown": "^6.5.0",
-    "@codemirror/state": "^6.5.2",
-    "@codemirror/view": "^6.38.6",
-    "@rollup/plugin-commonjs": "^29.0.0",
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/lang-markdown": "^6.5.2",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.14",
+    "@rollup/plugin-commonjs": "^29.0.3",
     "@rollup/plugin-node-resolve": "^16.0.3",
-    "@types/node": "^24.10.1",
-    "@y/protocols": "^1.0.6-3",
-    "@y/websocket": "^4.0.0-3",
+    "@types/node": "^26.6.5",
+    "@y/protocols": "^1.0.6-rc.1",
+    "@y/websocket": "^4.0.0-rc.2",
+    "@y/y": "^14.0.0-rc.28",
     "codemirror": "^6.0.0",
-    "concurrently": "^5.3.0",
+    "concurrently": "^10.0.6",
     "http-server": "^14.1.0",
-    "jsdom": "^16.7.0",
-    "rollup": "^4.53.3",
+    "jsdom": "^30.1.2",
+    "rollup": "^4.64.5",
     "standard": "^17.1.2",
-    "typescript": "^5.9.3"
+    "typescript": "^7.0.2"
   }
 }

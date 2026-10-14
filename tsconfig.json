@@ -2,20 +2,20 @@
   "compilerOptions": {
     "target": "esnext",
     "lib": ["ESNext", "dom"],
+    "types": ["node"],
     "module": "nodenext",
     "allowJs": true,
     "checkJs": true,
     "declaration": true,
     "declarationMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
     "rootDir": "./",
     "emitDeclarationOnly": true,
     "strict": true,
     "noImplicitAny": true,
     "moduleResolution": "nodenext",
     "paths": {
-      "y-codemirror": ["src/index.js"]
+      "y-codemirror": ["./src/index.js"]
     }
   },
   "include": ["src/**/*.js", "./demo/**/*.js", "./test/**/*.js"]

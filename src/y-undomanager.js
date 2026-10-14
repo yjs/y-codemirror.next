@@ -76,12 +76,20 @@ class YUndoManagerPluginValue {
       // store the selection before the change is applied so we can restore it with the undo manager.
       this._beforeChangeSelection = this.syncConf.toYRange(this.view.state.selection.main)
     }
+    // The handler types are declared explicitly (with a loosely typed event) because the inferred
+    // type references `StackItemEvent`, which @y/y doesn't export - tsc can't emit it portably.
+    /**
+     * @type {(event: any, undoManager: Y.UndoManager) => void}
+     */
     this._onStackItemAdded = this._undoManager.on('stack-item-added', ({ stackItem, changedParentTypes }) => {
       // only store metadata if this type was affected
       if (changedParentTypes.has(this.syncConf.ytext) && this._beforeChangeSelection && !stackItem.meta.has(this)) { // do not overwrite previous stored selection
         stackItem.meta.set(this, this._beforeChangeSelection)
       }
     })
+    /**
+     * @type {(event: any, undoManager: Y.UndoManager) => void}
+     */
     this._onStackItemPopped = this._undoManager.on('stack-item-popped', ({ stackItem }) => {
       const sel = stackItem.meta.get(this)
       if (sel) {
