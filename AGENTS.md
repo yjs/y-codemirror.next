@@ -35,6 +35,15 @@ Guidance for AI coding agents working in this repository.
 - Peer deps: `@y/y`, `@y/protocols`, `@codemirror/state`, `@codemirror/view` — do not import transitively; treat as host-provided
 - Tests use the lib0 testing framework (`lib0/testing`, `lib0/prng`) — see the `lib0-testing` skill
 
+## Releasing
+
+Releases are automated by `.github/workflows/publish.yml` (ported from `@y/y`):
+
+1. Move the `Unreleased` entries in `CHANGELOG.md` under a heading for the new version
+2. Bump `version` in `package.json` and push to `main` — no tag is needed
+
+Once the `Node.js CI` workflow succeeds on `main`, the publish workflow publishes the version to npm with provenance (`beta` tag for prerelease versions, `latest` otherwise) and creates a GitHub release `v<version>` with generated notes, which also creates the tag. Versions that already exist on npm are skipped, so pushes without a version bump never publish.
+
 ## Before finishing a change
 
 1. `npm run lint`
