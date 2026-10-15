@@ -23,12 +23,11 @@ This binding binds a [Y.Text](https://docs.yjs.dev/api/shared-types/y.text) to a
 /* eslint-env browser */
 
 import * as Y from '@y/y'
-// @ts-ignore
-import { yCollab } from 'y-codemirror.next'
-import { WebrtcProvider } from 'y-webrtc'
+import { yCollab } from '@y/codemirror'
+import { WebsocketProvider } from '@y/websocket'
 
-import { EditorView, basicSetup } from "codemirror";
-import { EditorState } from "@codemirror/state";
+import { EditorView, basicSetup } from 'codemirror'
+import { EditorState } from '@codemirror/state'
 import { javascript } from '@codemirror/lang-javascript'
 
 import * as random from 'lib0/random'
@@ -48,8 +47,8 @@ export const usercolors = [
 export const userColor = usercolors[random.uint32() % usercolors.length]
 
 const ydoc = new Y.Doc()
-const provider = new WebrtcProvider('codemirror6-demo-room', ydoc)
-const ytext = ydoc.getText('codemirror')
+const provider = new WebsocketProvider('wss://demos.yjs.dev/ws', 'codemirror6-demo-room', ydoc)
+const ytext = ydoc.get('codemirror')
 
 const undoManager = new Y.UndoManager(ytext)
 
@@ -69,7 +68,6 @@ const state = EditorState.create({
 })
 
 const view = new EditorView({ state, parent: /** @type {HTMLElement} */ (document.querySelector('#editor')) })
-
 ```
 
 ## API

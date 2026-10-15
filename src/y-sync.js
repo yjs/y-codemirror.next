@@ -233,6 +233,11 @@ class YSyncPluginValue {
     this.conf = view.state.facet(ySyncFacet)
     this._ytext = this.conf.ytext
     const renderer = this.conf.renderer
+    // Declared explicitly: the inferred type names `Transaction` unqualified (the @y/y declarations
+    // reference it without importing it), which would leak into our emitted declarations.
+    /**
+     * @type {(event: Y.YEvent<{ text: true }>, tr: Y.Transaction) => void}
+     */
     this._observer = this._ytext.observe((event, tr) => {
       /**
        * @type {delta.Delta<{text: true}>?}

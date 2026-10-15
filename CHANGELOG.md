@@ -30,6 +30,8 @@ listed on the [GitHub releases page](https://github.com/yjs/y-codemirror.next/re
 
 - When Yjs reverts part of a local change that targeted deleted-but-rendered content (e.g. typing
   into a suggested deletion), the editor content is reverted as well.
+- The emitted type declarations referenced an unqualified `Transaction` type, which failed to
+  resolve for consumers that type-check declaration files (no `skipLibCheck`).
 
 ### Removed
 
