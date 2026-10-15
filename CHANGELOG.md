@@ -23,6 +23,8 @@ listed on the [GitHub releases page](https://github.com/yjs/y-codemirror.next/re
   is no longer used.
 - Require `@y/y` `^14.0.0-rc.28`, `@y/protocols` `^1.0.6-rc.1`, `lib0` `^1.0.0-rc.36`,
   `@codemirror/state` `^6.7.6` and `@codemirror/view` `^6.43.14`.
+- The npm package no longer ships the demo and test bundles with their source maps, which
+  shrinks it from about 15 MB to about 130 kB unpacked. The changelog is now included.
 
 ### Fixed
 

@@ -12,8 +12,11 @@
     "url": "https://github.com/sponsors/dmonad"
   },
   "files": [
-    "dist/*",
-    "src/*"
+    "dist/src",
+    "dist/y-codemirror.cjs",
+    "dist/y-codemirror.cjs.map",
+    "src",
+    "CHANGELOG.md"
   ],
   "exports": {
     ".": {
